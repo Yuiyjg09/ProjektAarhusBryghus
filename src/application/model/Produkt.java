@@ -4,6 +4,7 @@ public class Produkt {
     private String navn;
     private String metrik;
     private int lagerAntal;
+    private Produktkategori kategori;
 
     public Produkt(String navn, String metrik, int lagerAntal) {
         this.navn = navn;
@@ -33,5 +34,13 @@ public class Produkt {
 
     public void setLagerAntal(int lagerAntal) {
         this.lagerAntal = lagerAntal;
+    }
+
+    public Produktkategori getKategori() {
+        return kategori;
+    }
+
+    public void setKategori(Produktkategori kategori) {
+        this.kategori = kategori;
     }
 }
