@@ -2,14 +2,15 @@ package application.model;
 
 public class Produkt {
     private String navn;
-    private String metrik;
+    private double stoerrelse;
     private int lagerAntal;
     private Produktkategori kategori;
 
-    public Produkt(String navn, String metrik, int lagerAntal) {
+    public Produkt(String navn, double stoerrelse, int lagerAntal, Produktkategori kategori) {
         this.navn = navn;
-        this.metrik = metrik;
+        this.stoerrelse = stoerrelse;
         this.lagerAntal = lagerAntal;
+        this.kategori = kategori;
     }
 
     public String getNavn() {
@@ -20,12 +21,12 @@ public class Produkt {
         this.navn = navn;
     }
 
-    public String getMetrik() {
-        return metrik;
+    public double getStoerrelse() {
+        return stoerrelse;
     }
 
-    public void setMetrik(String metrik) {
-        this.metrik = metrik;
+    public void setStoerrelse(double stoerrelse) {
+        this.stoerrelse = stoerrelse;
     }
 
     public int getLagerAntal() {

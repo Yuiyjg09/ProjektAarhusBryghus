@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Produktkategori {
     private String navn;
     private String beskrivelse;
+    private Maalbar metrik;
     private ArrayList<Produkt> produkter;
 
     public Produktkategori(String navn, String beskrivelse) {
@@ -35,5 +36,21 @@ public class Produktkategori {
 
     public void addProdukt(Produkt produkt) {
         this.produkter.add(produkt);
+    }
+
+    public Maalbar getMetrik() {
+        return metrik;
+    }
+
+    public void setMetrik(Maalbar metrik) {
+        this.metrik = metrik;
+    }
+
+    @Override
+    public String toString() {
+        return "Produktkategori{" +
+                "navn='" + navn + '\'' +
+                ", metrik=" + metrik +
+                '}';
     }
 }
