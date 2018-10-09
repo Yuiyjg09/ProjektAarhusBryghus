@@ -47,15 +47,14 @@ public class Produktkategori {
         return metrik;
     }
 
+    public String getMetrikName() {return metrik.name();}
+
     public void setMetrik(Maalbar metrik) {
         this.metrik = metrik;
     }
 
     @Override
     public String toString() {
-        return "Produktkategori{" +
-                "navn='" + navn + '\'' +
-                ", metrik=" + metrik +
-                '}';
+        return navn + " (" + produkter.size() + ")";
     }
 }

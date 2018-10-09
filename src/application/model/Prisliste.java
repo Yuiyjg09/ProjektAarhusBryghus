@@ -60,4 +60,9 @@ public class Prisliste {
     public void setPriser(ArrayList<Pris> priser) {
         this.priser = priser;
     }
+
+    @Override
+    public String toString() {
+        return navn + " (" + priser.size() + ")";
+    }
 }

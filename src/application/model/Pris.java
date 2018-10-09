@@ -34,4 +34,9 @@ public class Pris {
     public void setPris(double pris) {
         this.pris = pris;
     }
+
+    @Override
+    public String toString() {
+        return produkt + " " + pris + "kr" + " (" + produkt.getKategori().getNavn() + ")";
+    }
 }
