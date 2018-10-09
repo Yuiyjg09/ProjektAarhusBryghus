@@ -8,9 +8,10 @@ public class Produktkategori {
     private Maalbar metrik;
     private ArrayList<Produkt> produkter;
 
-    public Produktkategori(String navn, String beskrivelse) {
+    public Produktkategori(String navn, String beskrivelse, Maalbar metrik) {
         this.navn = navn;
         this.beskrivelse = beskrivelse;
+        this.metrik = metrik;
         this.produkter = new ArrayList<Produkt>();
     }
 
@@ -36,6 +37,10 @@ public class Produktkategori {
 
     public void addProdukt(Produkt produkt) {
         this.produkter.add(produkt);
+    }
+
+    public void removeProdukt(Produkt produkt) {
+        this.produkter.remove(produkt);
     }
 
     public Maalbar getMetrik() {
