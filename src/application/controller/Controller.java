@@ -65,7 +65,7 @@ public class Controller {
      * @param lagerAntal int
      * @param produktkategori Produktkategori
      * @param priser ArrayList
-     * @return
+     * @return Produkt
      */
     public static Produkt createProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, ArrayList<Pris> priser) {
         Produkt produkt = new Produkt(navn, stoerrelse, lagerAntal, produktkategori);
