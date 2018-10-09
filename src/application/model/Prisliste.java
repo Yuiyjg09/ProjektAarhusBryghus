@@ -1,6 +1,5 @@
 package application.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -56,5 +55,9 @@ public class Prisliste {
 
     public void addPris(Pris pris) {
         this.priser.add(pris);
+    }
+
+    public void setPriser(ArrayList<Pris> priser) {
+        this.priser = priser;
     }
 }

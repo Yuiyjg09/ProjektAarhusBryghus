@@ -1,10 +1,13 @@
 package application.model;
 
+import java.util.ArrayList;
+
 public class Produkt {
     private String navn;
     private double stoerrelse;
     private int lagerAntal;
     private Produktkategori kategori;
+    private ArrayList<Pris> priser;
 
     public Produkt(String navn, double stoerrelse, int lagerAntal, Produktkategori kategori) {
         this.navn = navn;
@@ -43,5 +46,17 @@ public class Produkt {
 
     public void setKategori(Produktkategori kategori) {
         this.kategori = kategori;
+    }
+
+    public ArrayList<Pris> getPriser() {
+        return new ArrayList<Pris>(priser);
+    }
+
+    public void setPriser(ArrayList<Pris> priser) {
+        this.priser = priser;
+    }
+
+    public void addPris (Pris pris) {
+        this.priser.add(pris);
     }
 }
