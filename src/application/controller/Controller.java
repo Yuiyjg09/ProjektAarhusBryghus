@@ -58,6 +58,15 @@ public class Controller {
     //------------------------------------------------
     // Produkt
 
+    /***
+     * Metoden opretter et produkt objekt, relationer til oprettede pris-objekter, relation til et produktkategori objekt og returnere det nye produkt objekt
+     * @param navn String
+     * @param stoerrelse double
+     * @param lagerAntal int
+     * @param produktkategori Produktkategori
+     * @param priser ArrayList
+     * @return
+     */
     public static Produkt createProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, ArrayList<Pris> priser) {
         Produkt produkt = new Produkt(navn, stoerrelse, lagerAntal, produktkategori);
         produkt.setPriser(priser);
@@ -65,13 +74,22 @@ public class Controller {
         return produkt;
     }
 
-    public static void updateProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, Produkt produkt) {
+    /***
+     * Metoden updatere et produkt objekt og dens relation et produktkategori objekt, samt opdatere dens relation til Pris
+     * @param navn String
+     * @param stoerrelse double
+     * @param lagerAntal int
+     * @param produktkategori Produktkategori
+     * @param produkt Produkt
+     */
+    public static void updateProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, Produkt produkt, ArrayList<Pris> priser) {
         produkt.setNavn(navn);
         produkt.setStoerrelse(stoerrelse);
         produkt.setLagerAntal(lagerAntal);
         produkt.getKategori().removeProdukt(produkt);
         produkt.setKategori(produktkategori);
         produktkategori.addProdukt(produkt);
+        produkt.setPriser(priser);
     }
 
     public static void deleteprodukt(Produkt produkt) {
@@ -131,7 +149,4 @@ public class Controller {
         return p1;
     }
 
-    public static void updatePris(Pris pris, double nypris, Produkt produkt, Prisliste prisliste) {
-        pris.setPris(nypris);
-    }
 }
