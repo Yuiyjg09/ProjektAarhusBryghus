@@ -12,11 +12,11 @@ public class Controller {
     // Poduktkategori
 
     /***
-     *
+     * Metoden opretter, tilføjer til storage og returnere et nyt produktkategori objekt.
      * @param navn String
      * @param beskrivelse String
      * @param metrik Metrik
-     * @return
+     * @return Ny produktkategori
      */
     public static Produktkategori createProduktkategori(String navn, String beskrivelse, Maalbar metrik) {
         Produktkategori produktkategori = new Produktkategori(navn, beskrivelse, metrik);
@@ -25,7 +25,7 @@ public class Controller {
     }
 
     /***
-     *
+     * Metode opdatere et produktkategori objekt
      * @param navn String
      * @param beskrivelse String
      * @param metrik Metrik
@@ -37,6 +37,10 @@ public class Controller {
         produktkategori.setMetrik(metrik);
     }
 
+    /***
+     * Metoden fjerner et produktkategori objekt fra storage, hvis den ikke indeholder nogen tilknyttede produkter
+     * @param produktkategori Produktkategori
+     */
     public static void deleteProduktkategori(Produktkategori produktkategori) {
         try
         {
@@ -85,20 +89,38 @@ public class Controller {
         return p1;
     }
 
+    /***
+     * Metoden updatere et prisliste objekt, samt relationerne mellem pris og produkt for det pågældende prisliste objekt
+     * @param prisliste Prisliste
+     * @param navn String
+     * @param beskrivelse String
+     * @param datoStart Datetime
+     * @param datoSlut Datetime
+     * @param priser ArrayList
+     */
     public static void updatePrisliste(Prisliste prisliste, String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut, ArrayList<Pris> priser) {
         prisliste.setNavn(navn);
         prisliste.setBeskrivelse(beskrivelse);
         prisliste.setDatoStart(datoStart);
         prisliste.setDatoSlut(datoSlut);
-        prisliste.setPriser(priser);
-    }
-
-    public static void deletePrisliste (Prisliste prisliste) {
-        Storage.removePrisliste(prisliste);
 
         for (Pris p : prisliste.getPriser()) {
             p.getProdukt().getPriser().remove(p);
         }
+
+        prisliste.setPriser(priser);
+
+        for (Pris p2 : priser) {
+            p2.getProdukt().addPris(p2);
+        }
+    }
+
+    public static void deletePrisliste (Prisliste prisliste) {
+        for (Pris p : prisliste.getPriser()) {
+            p.getProdukt().getPriser().remove(p);
+        }
+
+        Storage.removePrisliste(prisliste);
     }
 
     //------------------------------------------------
