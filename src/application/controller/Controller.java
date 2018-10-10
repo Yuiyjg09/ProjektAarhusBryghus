@@ -23,6 +23,10 @@ public class Controller {
         return produktkategori;
     }
 
+    public static ArrayList<Produktkategori> getProduktkategorier() {
+        return Storage.getProduktkategorier();
+    }
+
     /***
      * Metode opdatere et produktkategori objekt
      * @param navn String
@@ -72,6 +76,10 @@ public class Controller {
         return produkt;
     }
 
+    public static ArrayList<Produkt> getProdukter() {
+        return Storage.getProdukter();
+    }
+
     /***
      * Metoden updatere et produkt objekt og dens relation et produktkategori objekt, samt opdatere dens relation til Pris
      * @param navn String
@@ -102,6 +110,10 @@ public class Controller {
         //p1.setPriser(priser);
         Storage.addPrisliste(p1);
         return p1;
+    }
+
+    public static ArrayList<Prisliste> getPrislister() {
+        return Storage.getPrislister();
     }
 
     /***

@@ -1,5 +1,6 @@
 package gui;
 
+import application.controller.Controller;
 import application.model.Produkt;
 import application.model.Produktkategori;
 import javafx.beans.value.ChangeListener;
@@ -7,7 +8,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
-import storage.Storage;
 
 
 public class ProduktkategoriPane extends GridPane {
@@ -29,7 +29,7 @@ public class ProduktkategoriPane extends GridPane {
 
         lwProduktkategorier = new ListView<>();
         this.add(lwProduktkategorier,0,1);
-        lwProduktkategorier.getItems().addAll(Storage.getProduktkategorier());
+        lwProduktkategorier.getItems().addAll(Controller.getProduktkategorier());
 
         lwProdukter = new ListView<>();
         this.add(lwProdukter,1,1);

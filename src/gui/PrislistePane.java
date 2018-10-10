@@ -7,7 +7,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import storage.Storage;
 
 public class PrislistePane extends GridPane {
     private ListView<Prisliste> lwPrislister;
@@ -28,7 +27,7 @@ public class PrislistePane extends GridPane {
 
         lwPrislister = new ListView<>();
         this.add(lwPrislister,0,1);
-        lwPrislister.getItems().addAll(Storage.getPrislister());
+        lwPrislister.getItems().addAll(Controller.getPrislister());
 
         lwPriser = new ListView<>();
         this.add(lwPriser,1,1);
@@ -57,11 +56,13 @@ public class PrislistePane extends GridPane {
 
     private void updateControls() {
         lwPrislister.getItems().clear();
-        lwPrislister.getItems().setAll(Storage.getPrislister());
+        lwPrislister.getItems().setAll(Controller.getPrislister());
         lwPrislister.getSelectionModel().select(0);
     }
 
     private void selectedPrislisteChanged() {
+        lwPrislister.getItems().clear();
+        lwPrislister.getItems().addAll(Controller.getPrislister());
         lwPriser.getItems().clear();
         pl1 = lwPrislister.getSelectionModel().getSelectedItem();
         if (pl1 != null) {
