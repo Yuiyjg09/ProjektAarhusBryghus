@@ -48,7 +48,7 @@ public class MainApp extends Application {
 
         ProduktkategoriPane produktkategoritab = new ProduktkategoriPane();
         produktkategoriTab.setContent(produktkategoritab);
-        //produktkategoriTab.setOnSelectionChanged(event ->produktkategoritab.updateControls());
+        produktkategoriTab.setOnSelectionChanged(event ->produktkategoritab.updateControls());
 
         //-------------------------------------------
         //PrislistePane
