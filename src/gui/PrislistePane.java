@@ -58,7 +58,7 @@ public class PrislistePane extends GridPane {
     private void updateControls() {
         lwPrislister.getItems().clear();
         lwPrislister.getItems().setAll(Storage.getPrislister());
-        
+        lwPrislister.getSelectionModel().select(0);
     }
 
     private void selectedPrislisteChanged() {
@@ -66,6 +66,9 @@ public class PrislistePane extends GridPane {
         pl1 = lwPrislister.getSelectionModel().getSelectedItem();
         if (pl1 != null) {
             lwPriser.getItems().addAll(pl1.getPriser());
+            if (!pl1.getPriser().isEmpty()) {
+                lwPriser.getSelectionModel().select(0);
+            }
         }
 
         updateControls();
