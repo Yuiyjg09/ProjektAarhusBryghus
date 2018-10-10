@@ -54,7 +54,8 @@ public class Controller {
             }
         }
          catch (Exception e) {
-            e.printStackTrace();
+            e.getMessage();
+            //e.printStackTrace();
         }
     }
 
@@ -101,6 +102,18 @@ public class Controller {
     public static void deleteprodukt(Produkt produkt) {
         produkt.getKategori().removeProdukt(produkt);
         produkt.setKategori(null);
+        for (Pris p : produkt.getPriser()) {
+            Controller.deletePris(p);
+        }
+    }
+
+    public static ArrayList<Prisliste> getProduktPrislister (Produkt p) {
+        ArrayList<Prisliste> prisliste = new ArrayList<>();
+        for (Pris pris : p.getPriser()) {
+            prisliste.add(pris.getPrisliste());
+        }
+
+        return prisliste;
     }
 
     //------------------------------------------------
