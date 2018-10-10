@@ -57,12 +57,37 @@ public class Prisliste {
         this.priser.add(pris);
     }
 
+    public void removePris(Pris pris) {
+        this.priser.remove(pris);
+    }
+
     public void setPriser(ArrayList<Pris> priser) {
         this.priser = priser;
     }
 
+    public void createPris(double stkpris, Produkt produkt) {
+        Pris pris = new Pris(stkpris, produkt, this);
+        produkt.addPris(pris);
+        this.addPris(pris);
+    }
+
+    public void updatePris(double stkpris, Pris pris) {
+        pris.setPris(stkpris);
+    }
+
+    public void deletePris(Pris pris) {
+        pris.getProdukt().removePris(pris);
+        pris.getPrisliste().removePris(pris);
+        pris.setProdukt(null);
+        pris.setPrisliste(null);
+    }
+
     @Override
     public String toString() {
-        return navn + " (" + priser.size() + ")";
+        if (priser == null) {
+            return navn + " (ingen)";
+        } else {
+            return navn + " (" + priser.size() + ")";
+        }
     }
 }

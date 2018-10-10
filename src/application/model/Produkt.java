@@ -60,6 +60,10 @@ public class Produkt {
         this.priser.add(pris);
     }
 
+    public void removePris (Pris pris) {
+        this.priser.remove(pris);
+    }
+
     @Override
     public String toString() {
         return navn + " " + stoerrelse + kategori.getMetrikName();

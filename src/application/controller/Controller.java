@@ -140,21 +140,12 @@ public class Controller {
 
     //------------------------------------------------
     // Pris
-    public static Pris createPris(double pris, Produkt produkt, Prisliste prisliste) {
-        Pris p1 = new Pris(pris, produkt, prisliste);
-        return p1;
+    public static void createPris(double pris, Produkt produkt, Prisliste prisliste) {
+        prisliste.createPris(pris, produkt);
     }
 
-    public static void createPrislisteRelations (Pris pris, Prisliste prisliste, Produkt produkt) {
-        try {
-            if (!prisliste.getPriser().contains(pris) && !produkt.getPriser().contains(pris)) {
-                prisliste.addPris(pris);
-                produkt.addPris(pris);
-            } else
-                throw new Exception("Dette produkt er ellerede registreret på denne prisliste");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void deletePris(Pris pris) {
+        pris.getPrisliste().deletePris(pris);
     }
 
     //------------------------------------------------
@@ -175,26 +166,14 @@ public class Controller {
         Produkt p5 = Controller.createProdukt("Extra Pilsner", 40, 100,pk2);
         Produkt p6 = Controller.createProdukt("Blondie", 40, 100,pk2);
 
-        Pris pris1 = Controller.createPris(35,p1,pl1);
-        Pris pris2 = Controller.createPris(35,p2,pl1);
-        Pris pris3 = Controller.createPris(35,p3,pl1);
-        Pris pris4 = Controller.createPris(50,p1,pl2);
-        Pris pris5 = Controller.createPris(50,p2,pl2);
-        Pris pris6 = Controller.createPris(50,p3,pl2);
-
-        Pris pris7 = Controller.createPris(30,p4,pl2);
-        Pris pris8 = Controller.createPris(30,p5,pl2);
-        Pris pris9 = Controller.createPris(30,p6,pl2);
-
-        Controller.createPrislisteRelations(pris1,pl1,p1);
-        Controller.createPrislisteRelations(pris2,pl1,p2);
-        Controller.createPrislisteRelations(pris3,pl1,p3);
-        Controller.createPrislisteRelations(pris4,pl2,p1);
-        Controller.createPrislisteRelations(pris5,pl2,p2);
-        Controller.createPrislisteRelations(pris6,pl2,p3);
-
-        Controller.createPrislisteRelations(pris7,pl2,p4);
-        Controller.createPrislisteRelations(pris8,pl2,p5);
-        Controller.createPrislisteRelations(pris9,pl2,p6);
+        Controller.createPris(35, p1, pl1);
+        Controller.createPris(35, p2, pl1);
+        Controller.createPris(35, p3, pl1);
+        Controller.createPris(50, p1, pl2);
+        Controller.createPris(50, p2, pl2);
+        Controller.createPris(50, p3, pl2);
+        Controller.createPris(30, p4, pl2);
+        Controller.createPris(30, p5, pl2);
+        Controller.createPris(30, p6, pl2);
     }
 }
