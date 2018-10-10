@@ -9,11 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import storage.Storage;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,12 +24,12 @@ class OpretPrislisteWindow extends Stage {
     private DatePicker dpStart, dpSlut;
     private Produkt produktSelected, produktToRemove;
     private HashMap<Produkt, Double> priser = new HashMap<>();
-    private Prisliste prislisten;
+    private Prisliste prislisten = null;
 
     OpretPrislisteWindow() {
         GridPane pane = new GridPane();
         pane.setGridLinesVisible(false);
-        this.initContent(pane);
+        Controller.initStorage();
         Scene scene = new Scene(pane);
         this.setScene(scene);
     }
@@ -38,7 +38,9 @@ class OpretPrislisteWindow extends Stage {
         this.prislisten = prisliste;
         GridPane pane = new GridPane();
         pane.setGridLinesVisible(false);
-        this.initContent(pane);
+        Controller.initStorage();
+        Scene scene = new Scene(pane);
+        this.setScene(scene);
     }
 
     private void initContent(GridPane gridPane) {
@@ -84,6 +86,16 @@ class OpretPrislisteWindow extends Stage {
             txaBeskrivelse.setText(prislisten.getBeskrivelse());
         }
 
+        //Produkter ikke-tilføjet
+        Label lblProdukter = new Label("Produkter Ikke-Tilføjet");
+        gridPane.add(lblProdukter, 0, 7);
+        lvwProdukter = new ListView<>();
+        gridPane.add(lvwProdukter, 0, 8);
+        lvwProdukter.getItems().addAll(Controller.getProdukter());
+
+        ChangeListener<Produkt> produktChangeListener = (opitem1, olditem1, newitem1) -> this.selectChangeListnerProdukt();
+        lvwProdukter.getSelectionModel().selectedItemProperty().addListener(produktChangeListener);
+
         //Pris
         Label lblPris = new Label("Pris: ");
         gridPane.add(lblPris, 1, 8);
@@ -102,28 +114,12 @@ class OpretPrislisteWindow extends Stage {
                 produkter.add(pris.getProdukt());
             }
             lvwTilfoejet.getItems().addAll(produkter);
-        } else lvwTilfoejet.getItems().addAll();
+        } else {
+            lvwTilfoejet.getItems().addAll();
+        }
 
         ChangeListener<Produkt> produktAddChangeListener = (opitem, olditem, newitem) -> this.selectChangeListnerAdded();
         lvwTilfoejet.getSelectionModel().selectedItemProperty().addListener(produktAddChangeListener);
-
-        //Produkter ikke-tilføjet
-        Label lblProdukter = new Label("Produkter Ikke-Tilføjet");
-        gridPane.add(lblProdukter, 0, 7);
-        lvwProdukter = new ListView<>();
-        gridPane.add(lvwProdukter, 0, 8);
-        ArrayList<Produkt> produkterTemp = Storage.getProdukter();
-        if (prislisten != null) {
-            for (Produkt produkt:
-                    produkterTemp) {
-                if (!lvwTilfoejet.getItems().contains(produkt)) {
-                    lvwProdukter.getItems().add(produkt);
-                }
-            }
-        } else lvwProdukter.getItems().addAll(produkterTemp);
-
-        ChangeListener<Produkt> produktChangeListener = (opitem, olditem, newitem) -> this.selectChangeListnerProdukt();
-        lvwProdukter.getSelectionModel().selectedItemProperty().addListener(produktChangeListener);
 
         //Buttons
         Button btnAdd = new Button("Tilføj");
@@ -190,28 +186,37 @@ class OpretPrislisteWindow extends Stage {
                 && !txfDatoStart.getText().isEmpty()
                 && !txfDatoSlut.getText().isEmpty()
                 && !txaBeskrivelse.getText().isEmpty()) {
-            LocalDateTime dtStart = LocalDateTime.of(dpStart.getValue(), LocalTime.parse(txfDatoStart.getText(), DateTimeFormatter.ofPattern("HH-mm")));
-            LocalDateTime dtSlut = LocalDateTime.of(dpSlut.getValue(), LocalTime.parse(txfDatoSlut.getText(), DateTimeFormatter.ofPattern("HH-mm")));
-            Prisliste prisliste;
-            if (prislisten != null) {
-                prisliste = prislisten;
+            try {
+                LocalDateTime dtStart = LocalDateTime.of(dpStart.getValue(), LocalTime.parse(txfDatoStart.getText(), DateTimeFormatter.ofPattern("HH-mm")));
+                LocalDateTime dtSlut = LocalDateTime.of(dpSlut.getValue(), LocalTime.parse(txfDatoSlut.getText(), DateTimeFormatter.ofPattern("HH-mm")));
+                Prisliste prisliste;
+                if (prislisten != null) {
+                    prisliste = prislisten;
 
-            } else {
-                prisliste = Controller.createPrisliste(txfNavn.getText(),
-                        txaBeskrivelse.getText(),
-                        dtStart,
-                        dtSlut);
-            }
-            for (Pris pris:
-                 prisliste.getPriser()) {
-                Controller.deletePris(pris);
-            }
-            for (Produkt key:
-                 priser.keySet()) {
-                Controller.createPris(Double.parseDouble(priser.get(key).toString()), key, prisliste);
+                } else {
+                    prisliste = Controller.createPrisliste(txfNavn.getText(),
+                            txaBeskrivelse.getText(),
+                            dtStart,
+                            dtSlut);
+                }
+                for (Pris pris:
+                        prisliste.getPriser()) {
+                    Controller.deletePris(pris);
+                }
+                for (Produkt key:
+                        priser.keySet()) {
+                    Controller.createPris(Double.parseDouble(priser.get(key).toString()), key, prisliste);
+                }
+
+                this.close();
+            } catch (DateTimeParseException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Forkert Dato-format: HH-mm");
+                alert.setTitle("Format Fejl");
+                alert.showAndWait();
             }
 
-            this.close();
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setContentText("Fejl: Manglende Information");

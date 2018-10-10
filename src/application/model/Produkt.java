@@ -66,6 +66,6 @@ public class Produkt {
 
     @Override
     public String toString() {
-        return navn + " " + stoerrelse + kategori.getMetrikName();
+        return navn + " " + stoerrelse + " " + kategori.getMetrikName();
     }
 }

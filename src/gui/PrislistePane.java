@@ -6,19 +6,23 @@ import application.model.Prisliste;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
-public class PrislistePane extends GridPane {
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Optional;
+
+class PrislistePane extends GridPane {
     private ListView<Prisliste> lwPrislister;
     private ListView<Pris> lwPriser;
     private Prisliste pl1;
+    private final FileChooser fileChooserSave = new FileChooser();
 
-    public PrislistePane() {
+    PrislistePane() {
         this.setPadding(new Insets(20));
         this.setHgap(20);
         this.setVgap(10);
@@ -60,9 +64,10 @@ public class PrislistePane extends GridPane {
     }
 
     private void updateControls() {
-        lwPrislister.getItems().clear();
+        int selectedIndex = lwPrislister.getSelectionModel().getSelectedIndex();
         lwPrislister.getItems().setAll(Controller.getPrislister());
-        lwPrislister.getSelectionModel().select(0);
+        lwPrislister.getSelectionModel().select(selectedIndex);
+        pl1 = lwPrislister.getSelectionModel().getSelectedItem();
     }
 
     private void selectedPrislisteChanged() {
@@ -84,6 +89,7 @@ public class PrislistePane extends GridPane {
         OpretPrislisteWindow opretPrislisteWindow = new OpretPrislisteWindow();
         opretPrislisteWindow.showAndWait();
 
+        lwPrislister.getItems().setAll(Controller.getPrislister());
         updateControls();
     }
 
@@ -92,6 +98,7 @@ public class PrislistePane extends GridPane {
             OpretPrislisteWindow opretPrislisteWindow = new OpretPrislisteWindow(pl1);
             opretPrislisteWindow.showAndWait();
 
+            lwPrislister.getItems().setAll(Controller.getPrislister());
             updateControls();
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -103,9 +110,18 @@ public class PrislistePane extends GridPane {
 
     private void removeAction() {
         if (pl1 != null) {
-            Controller.deletePrisliste(pl1);
+            Stage owner = (Stage) this.getScene().getWindow();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Slet Prisliste");
+            alert.initOwner(owner);
+            alert.setHeaderText("Er du sikker?");
 
-            updateControls();
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                Controller.deletePrisliste(pl1);
+                lwPrislister.getItems().setAll(Controller.getPrislister());
+                updateControls();
+            }
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Fejl");
@@ -114,5 +130,45 @@ public class PrislistePane extends GridPane {
         }
     }
 
-    private void printAction() {}
+    private void printAction() {
+        if (pl1 != null) {
+            ArrayList<String> sb = new ArrayList<>();
+            sb.add(pl1.toString() + " \n");
+            for (Pris pris:
+                 pl1.getPriser()) {
+                sb.add( pris.getProdukt().toString() + ", Pris: " + pris.getPris() + " DKK \n");
+            }
+            this.saveFileEvent(fileChooserSave, sb);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Fejl");
+            alert.setContentText("Vælg en Prisliste for at fortsætte");
+            alert.showAndWait();
+        }
+    }
+
+    private static void configureFileChooserSave(final FileChooser fileChooser) {
+        fileChooser.setTitle("Save File");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt")
+        );
+    }
+
+    private void saveFileEvent(FileChooser fileChooserSave, ArrayList<String> toWrite) {
+        configureFileChooserSave(fileChooserSave);
+        File currentFile = fileChooserSave.showSaveDialog(null);
+        if (currentFile != null) {
+            try {
+                FileWriter fileWriter = new FileWriter(currentFile);
+                for (String str:
+                     toWrite) {
+                    fileWriter.append(str).append(System.getProperty("line.separator"));
+                }
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

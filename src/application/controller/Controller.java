@@ -72,7 +72,7 @@ public class Controller {
      */
     public static Produkt createProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori) {
         Produkt produkt = new Produkt(navn, stoerrelse, lagerAntal, produktkategori);
-        //produkt.setPriser(priser);
+        Storage.addProdukt(produkt);
         produktkategori.addProdukt(produkt);
         return produkt;
     }
