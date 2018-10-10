@@ -147,16 +147,17 @@ class PrislistePane extends GridPane {
         }
     }
 
-    private static void configureFileChooserSave(final FileChooser fileChooser) {
+    private static void configureFileChooserSave(final FileChooser fileChooser, String name) {
         fileChooser.setTitle("Save File");
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setInitialFileName(name);
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt")
         );
     }
 
     private void saveFileEvent(FileChooser fileChooserSave, ArrayList<String> toWrite) {
-        configureFileChooserSave(fileChooserSave);
+        configureFileChooserSave(fileChooserSave, pl1.getNavn());
         File currentFile = fileChooserSave.showSaveDialog(null);
         if (currentFile != null) {
             try {
