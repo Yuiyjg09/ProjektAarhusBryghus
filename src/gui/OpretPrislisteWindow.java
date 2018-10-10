@@ -29,8 +29,8 @@ class OpretPrislisteWindow extends Stage {
     OpretPrislisteWindow() {
         GridPane pane = new GridPane();
         pane.setGridLinesVisible(false);
-        Controller.initStorage();
         Scene scene = new Scene(pane);
+        this.initContent(pane);
         this.setScene(scene);
     }
 
@@ -38,8 +38,8 @@ class OpretPrislisteWindow extends Stage {
         this.prislisten = prisliste;
         GridPane pane = new GridPane();
         pane.setGridLinesVisible(false);
-        Controller.initStorage();
         Scene scene = new Scene(pane);
+        this.initContent(pane);
         this.setScene(scene);
     }
 
@@ -192,7 +192,14 @@ class OpretPrislisteWindow extends Stage {
                 Prisliste prisliste;
                 if (prislisten != null) {
                     prisliste = prislisten;
-
+                    prisliste.setNavn(txfNavn.getText());
+                    prisliste.setDatoStart(dtStart);
+                    prisliste.setDatoSlut(dtSlut);
+                    prisliste.setBeskrivelse(txaBeskrivelse.getText());
+                    for (Pris pris:
+                         prisliste.getPriser()) {
+                        priser.put(pris.getProdukt(), pris.getPris());
+                    }
                 } else {
                     prisliste = Controller.createPrisliste(txfNavn.getText(),
                             txaBeskrivelse.getText(),
