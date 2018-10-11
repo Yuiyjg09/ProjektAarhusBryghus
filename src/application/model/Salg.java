@@ -82,7 +82,7 @@ public class Salg {
             this.setBetalingsmetode(null);
         }
     }
-    
+
     public void beregnTotalPris() {
         double prisTotal = 0.0;
         for (Antal antal:
