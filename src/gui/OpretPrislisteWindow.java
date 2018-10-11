@@ -60,7 +60,7 @@ class OpretPrislisteWindow extends Stage {
         gridPane.add(dpStart, 0, 3);
         txfDatoStart = new TextField("HH-mm");
         gridPane.add(txfDatoStart, 1, 3);
-        if (prislisten != null) {
+        if (prislisten != null && prislisten.getDatoStart() != null) {
             dpStart.setValue(prislisten.getDatoStart().toLocalDate());
             txfDatoStart.setText(prislisten.getDatoStart().toLocalTime().toString());
         }
@@ -72,7 +72,7 @@ class OpretPrislisteWindow extends Stage {
         gridPane.add(dpSlut, 0, 6);
         txfDatoSlut = new TextField("HH-mm");
         gridPane.add(txfDatoSlut, 1, 6);
-        if (prislisten != null) {
+        if (prislisten != null && prislisten.getDatoSlut() != null) {
             dpSlut.setValue(prislisten.getDatoSlut().toLocalDate());
             txfDatoSlut.setText(prislisten.getDatoSlut().toLocalTime().toString());
         }

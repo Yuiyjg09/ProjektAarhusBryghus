@@ -177,8 +177,8 @@ public class Controller {
     // Initialize Storage
     public static void initStorage() {
 
-        Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", LocalDateTime.now(), LocalDateTime.now().plusDays(10));
-        Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", LocalDateTime.now(), LocalDateTime.now().plusDays(10));
+        Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", null, null);
+        Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", null, null);
 
         Produktkategori pk1 = Controller.createProduktkategori("Flaske øl", "Indeholder alle varianter af flaske øl", Maalbar.CL);
         Produktkategori pk2 = Controller.createProduktkategori("Fadøl", "Indeholder alle varianter af fadøl", Maalbar.CL);
