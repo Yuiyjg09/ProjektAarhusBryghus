@@ -54,8 +54,7 @@ public class Controller {
             }
         }
          catch (Exception e) {
-            e.getMessage();
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 

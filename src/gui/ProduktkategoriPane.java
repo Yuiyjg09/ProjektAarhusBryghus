@@ -113,8 +113,10 @@ public class ProduktkategoriPane extends GridPane {
                Optional<ButtonType> result = alert.showAndWait();
 
                if (result.isPresent() && result.get() == ButtonType.OK) {
+                   //Controller.deleteProduktkategori(pk);
                    try {
                        Controller.deleteProduktkategori(pk);
+                       updateControls();
                    } catch (Exception e) {
                        //e.printStackTrace();
                        TODO://Spørg Peter!
@@ -129,6 +131,7 @@ public class ProduktkategoriPane extends GridPane {
     private void createProduktAction() {
             OpretProduktWindow win = new OpretProduktWindow("Opret produkt");
             win.showAndWait();
+
             updateSelectedControls();
     }
 
@@ -139,6 +142,7 @@ public class ProduktkategoriPane extends GridPane {
         if(pk != null && p != null) {
             OpretProduktWindow win = new OpretProduktWindow("Rediger produkt",pk, p);
             win.showAndWait();
+
             updateSelectedControls();
         } else {
             lblError.setText("Der er ikke valgt en produktkategori eller produkt");
