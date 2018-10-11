@@ -174,6 +174,33 @@ public class Controller {
     }
 
     //------------------------------------------------
+    // Salg
+
+    public static Salg createSalg() {
+        Salg salg = new Salg();
+        Storage.addSalg(salg);
+        return salg;
+    }
+
+    public static void deleteSalg(Salg salg) {
+        Storage.removeSalg(salg);
+    }
+
+    public static void betal(Salg salg, boolean isBetalt, Sellable betalingsmetode) {
+        salg.betal(isBetalt, betalingsmetode);
+    }
+
+    //------------------------------------------------
+    // Antal
+
+    public static void createAntal(Produkt produkt, Salg salg, int antal) {
+        salg.createAntal(produkt, antal);
+    }
+    public static void deleteAntal(Antal antal) {
+        antal.getSalg().removeAntal(antal);
+    }
+
+    //------------------------------------------------
     // Initialize Storage
     public static void initStorage() {
 
