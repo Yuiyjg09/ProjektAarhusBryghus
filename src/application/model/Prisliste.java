@@ -65,10 +65,11 @@ public class Prisliste {
         this.priser = priser;
     }
 
-    public void createPris(double stkpris, Produkt produkt) {
+    public Pris createPris(double stkpris, Produkt produkt) {
         Pris pris = new Pris(stkpris, produkt, this);
         produkt.addPris(pris);
         this.addPris(pris);
+        return pris;
     }
 
     public void updatePris(double stkpris, Pris pris) {

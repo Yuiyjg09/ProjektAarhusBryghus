@@ -100,8 +100,9 @@ public class ProduktkategoriPane extends GridPane {
         if(pk != null) {
             OpretProduktkategoriWindow win = new OpretProduktkategoriWindow("Rediger produktkategori",pk);
             win.showAndWait();
+            updateControls();
         } else {
-            lblError.setText("Der er ikke valgt en produktkategori");
+            createErrAlert("Ups! Der er ikke valgt en produktkategori");
         }
     }
 
@@ -120,11 +121,12 @@ public class ProduktkategoriPane extends GridPane {
                    } catch (Exception e) {
                        //e.printStackTrace();
                        TODO://Spørg Peter!
-                       lblError.setText(e.getMessage());
+                       //lblError.setText(e.getMessage());
+                       createErrAlert("OBS! denne produktkategori indeholder produkter og kan ikke slettes");
                    }
                }
            } else {
-               Alert errAlert = createErrAlert("Ups der skete en fejl - ingen produktkategori er valgt");
+               createErrAlert("Ups der skete en fejl - ingen produktkategori er valgt");
            }
     }
 
@@ -132,20 +134,24 @@ public class ProduktkategoriPane extends GridPane {
             OpretProduktWindow win = new OpretProduktWindow("Opret produkt");
             win.showAndWait();
 
-            updateSelectedControls();
+            updateControls();
     }
 
     private void updateProduktAction() {
         Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
         Produkt p = lwProdukter.getSelectionModel().getSelectedItem();
 
-        if(pk != null && p != null) {
-            OpretProduktWindow win = new OpretProduktWindow("Rediger produkt",pk, p);
-            win.showAndWait();
+        if(pk != null) {
+            if (p != null) {
+                OpretProduktWindow win = new OpretProduktWindow("Rediger produkt",pk, p);
+                win.showAndWait();
 
-            updateSelectedControls();
+                updateSelectedControls();
+            } else {
+                createErrAlert("Ups! Der er ikke valgt et produkt");
+            }
         } else {
-            lblError.setText("Der er ikke valgt en produktkategori eller produkt");
+            createErrAlert("Ups! Der er ikke valgt en produktkategori");
         }
     }
 
@@ -163,7 +169,7 @@ public class ProduktkategoriPane extends GridPane {
                 updateSelectedControls();
             }
         } else {
-            Alert errAlert = createErrAlert("Ups der skete en fejl - intet produkt er valgt");
+            createErrAlert("Ups der skete en fejl - intet produkt er valgt");
         }
     }
 

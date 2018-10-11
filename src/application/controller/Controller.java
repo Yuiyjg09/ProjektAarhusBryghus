@@ -164,8 +164,9 @@ public class Controller {
 
     //------------------------------------------------
     // Pris
-    public static void createPris(double pris, Produkt produkt, Prisliste prisliste) {
-        prisliste.createPris(pris, produkt);
+    public static Pris createPris(double pris, Produkt produkt, Prisliste prisliste) {
+        Pris nyPris = prisliste.createPris(pris, produkt);
+        return nyPris;
     }
 
     public static void deletePris(Pris pris) {

@@ -5,21 +5,26 @@ import application.model.Pris;
 import application.model.Prisliste;
 import application.model.Produkt;
 import application.model.Produktkategori;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import storage.Storage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class OpretProduktWindow extends Stage {
     private Produktkategori produktkategori;
     private Produkt produkt;
-    //private ArrayList<Pris> priser;
+    private HashMap<Prisliste, Double> priserToAdd = new HashMap<>();
 
     public OpretProduktWindow(String title, Produktkategori produktkategori, Produkt produkt) {
         this.produktkategori = produktkategori;
@@ -45,9 +50,9 @@ public class OpretProduktWindow extends Stage {
     private TextField txfNavn, txfStoerrelse, txfLagerAntal, txfPris;
     private ListView<Prisliste> lwPl1, lwPl2;
     private ListView<Pris> lwPriser;
-    private Button btnAdd, btnRemove, btnOk, btnCancel, btnOpret;
+    private Button btnAdd, btnRemove, btnOk, btnCancel;
     private ComboBox<Produktkategori> cbPk;
-
+    private HBox hbox;
     private void initContent(GridPane pane) {
         pane.setPadding(new Insets(10));
         pane.setHgap(10);
@@ -98,13 +103,8 @@ public class OpretProduktWindow extends Stage {
         pane.add(lwPl1,0,5, 1,4);
         lwPl1.getItems().addAll(Storage.getPrislister());
 
-        lwPriser = new ListView<>();
-        pane.add(lwPriser,2,5,1,4);
-
-        btnOpret = new Button("Tilføj");
-        pane.add(btnOpret,3,1);
-        btnOpret.setOnAction(event -> this.opretAction());
-        btnOpret.setMaxWidth(Double.MAX_VALUE);
+        lwPl2 = new ListView<>();
+        pane.add(lwPl2,2,5,1,4);
 
         btnAdd = new Button("Tilføj");
         pane.add(btnAdd,1,6);
@@ -117,23 +117,41 @@ public class OpretProduktWindow extends Stage {
         btnRemove.setMaxWidth(Double.MAX_VALUE);
 
         btnOk = new Button("Ok");
-        pane.add(btnOk, 0,9);
+       // pane.add(btnOk, 0,9);
         btnOk.setOnAction(event -> this.okAction());
         btnOk.setMaxWidth(Double.MAX_VALUE);
 
         btnCancel = new Button("Cancel");
-        pane.add(btnCancel, 2,9);
+        //pane.add(btnCancel, 2,9);
         btnCancel.setOnAction(event -> this.cancelAction());
         btnCancel.setMaxWidth(Double.MAX_VALUE);
+
+        hbox = new HBox(20);
+        pane.add(hbox,1,9);
+        hbox.getChildren().addAll(btnOk, btnCancel);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.setHgrow(btnOk, Priority.ALWAYS);
+        hbox.setHgrow(btnCancel, Priority.ALWAYS);
+
+        ChangeListener<Prisliste> l1 = (op, oldObj, newObj) -> this.selectedPrislisteChanged();
+        lwPl2.getSelectionModel().selectedItemProperty().addListener(l1);
 
         initControls();
     }
 
-    private void opretAction() {
+    private void selectedPrislisteChanged() {
+        Prisliste selectedPl = lwPl2.getSelectionModel().getSelectedItem();
+        if (selectedPl != null) {
+            txfPris.setText("" + priserToAdd.get(selectedPl));
+        }
+    }
+
+    private void okAction() {
         Produktkategori pk = cbPk.getSelectionModel().getSelectedItem();
         String navn = txfNavn.getText();
         double stoerrelse = -1;
         int lagerAntal = -1;
+        ArrayList<Pris> priser = new ArrayList<>();
 
         if (navn.length() < 1) {
             createErrAlert("Der skal angives et produktnavn");
@@ -143,14 +161,14 @@ public class OpretProduktWindow extends Stage {
         try {
             stoerrelse = Double.parseDouble(txfStoerrelse.getText().trim());
         } catch (NumberFormatException e) {
-            createErrAlert("Størrelse skal angives med min. 1 decimal");
+            createErrAlert("Størrelse skal angives decimal eller heltal");
             return;
         }
 
         try {
             lagerAntal = Integer.parseInt(txfLagerAntal.getText().trim());
         } catch (NumberFormatException e) {
-            createErrAlert("Lagerantal skal angives i hele tal");
+            createErrAlert("Lagerantal skal angives som heltal");
             return;
         }
 
@@ -159,31 +177,32 @@ public class OpretProduktWindow extends Stage {
             return;
         }
 
-        produkt = Controller.createProdukt(navn, stoerrelse, lagerAntal, produktkategori);
-
-        btnOpret.setDisable(true);
-    }
-
-    private void okAction() {
-        Produktkategori pk = cbPk.getSelectionModel().getSelectedItem();
-        String navn = txfNavn.getText();
-        double stoerrelse = -1;
-        int lagerAntal = -1;
-        ArrayList<Pris> priser = new ArrayList<>(lwPriser.getItems());
-
-        if (priser.size() < 1) {
-            createErrAlert("OBS! Der skal angives en butikspris");
+        if (priserToAdd.size() < 1) {
+            createErrAlert("OBS! Produktet er ikke tilføjet en prisliste");
             return;
         }
 
         if (produkt != null) {
-           Controller.updateProdukt(navn, stoerrelse, lagerAntal, produktkategori, produkt, priser);
-            for (Pris p : lwPriser.getItems()) {
-                Controller.createPris(p.getPris(),produkt,p.getPrisliste());
+            for (Pris pris : produkt.getPriser()) {
+                Controller.deletePris(pris);
             }
+
+            for (Prisliste key: priserToAdd.keySet()) {
+                Pris nyPris = Controller.createPris(Double.parseDouble(priserToAdd.get(key).toString()),produkt,key);
+                priser.add(nyPris);
+            }
+
+           Controller.updateProdukt(navn, stoerrelse, lagerAntal, produktkategori, produkt, priser);
+
             this.hide();
         } else {
+            Produkt nytProdukt = Controller.createProdukt(navn,stoerrelse,lagerAntal,pk);
+            for (Prisliste key: priserToAdd.keySet()) {
+                Pris nyPris = Controller.createPris(Double.parseDouble(priserToAdd.get(key).toString()),nytProdukt,key);
+                priser.add(nyPris);
+            }
 
+            this.hide();
         }
 
     }
@@ -203,27 +222,31 @@ public class OpretProduktWindow extends Stage {
                 createErrAlert("Pris skal angives som decimal eller heltal");
                 return;
             }
+            if (!priserToAdd.containsKey(pl)) {
+                priserToAdd.put(pl, pris);
+                lwPl2.getItems().add(pl);
+            } else {
+                createErrAlert("Produktet eksistere allerede på denne prisliste");
+            }
 
-            Pris ptemp = new Pris(pris,produkt,pl);
-            lwPriser.getItems().add(ptemp);
-            //priser.add(ptemp);
+
         } else {
             createErrAlert("Ups - der er ikke valgt en prisliste");
         }
     }
 
     private void removeAction() {
-        Pris pris = lwPriser.getSelectionModel().getSelectedItem();
+        Prisliste pl = lwPl2.getSelectionModel().getSelectedItem();
 
-        if (pris != null) {
-            //priser.remove(p);
-            lwPriser.getItems().remove(pris);
+        if (pl != null) {
+            priserToAdd.remove(pl);
+            lwPl2.getItems().remove(pl);
         } else {
-            createErrAlert("Ups - der er ikke valgt en pris");
+            createErrAlert("Ups - der er ikke valgt en prisliste");
         }
     }
 
-    public Alert createAlert(String title, String headerText) {
+    private Alert createAlert(String title, String headerText) {
         Stage owner = (Stage) this.getScene().getWindow();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
@@ -233,7 +256,7 @@ public class OpretProduktWindow extends Stage {
         return alert;
     }
 
-    public Alert createErrAlert(String headerText) {
+    private Alert createErrAlert(String headerText) {
         Stage owner = (Stage) this.getScene().getWindow();
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText(headerText);
@@ -249,8 +272,10 @@ public class OpretProduktWindow extends Stage {
             txfStoerrelse.setText("" + produkt.getStoerrelse());
             txfLagerAntal.setText("" + produkt.getLagerAntal());
             cbPk.setValue(produkt.getKategori());
-            //priser = produkt.getPriser();
-            lwPriser.getItems().addAll(produkt.getPriser());
+            for (Pris p : produkt.getPriser()) {
+                lwPl2.getItems().add(p.getPrisliste());
+                priserToAdd.put(p.getPrisliste(),p.getPris());
+            }
         } else {
 
         }
