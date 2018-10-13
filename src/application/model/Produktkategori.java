@@ -6,13 +6,12 @@ public class Produktkategori {
     private String navn;
     private String beskrivelse;
     private Maalbar metrik;
-    private ArrayList<Produkt> produkter;
+    private ArrayList<Produkt> produkter = new ArrayList<>();
 
     public Produktkategori(String navn, String beskrivelse, Maalbar metrik) {
         this.navn = navn;
         this.beskrivelse = beskrivelse;
         this.metrik = metrik;
-        this.produkter = new ArrayList<Produkt>();
     }
 
     public String getNavn() {

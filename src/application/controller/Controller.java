@@ -44,7 +44,8 @@ public class Controller {
      * Metoden fjerner et produktkategori objekt fra storage, hvis den ikke indeholder nogen tilknyttede produkter
      * @param produktkategori Produktkategori
      */
-    public static void deleteProduktkategori(Produktkategori produktkategori) {
+    public static String deleteProduktkategori(Produktkategori produktkategori) {
+        String msg = "Produktkategorien er blevet slettet";
         try
         {
             if (produktkategori.getProdukter().isEmpty()) {
@@ -54,14 +55,15 @@ public class Controller {
             }
         }
          catch (Exception e) {
-            e.printStackTrace();
+            msg = e.getMessage();
         }
+        return msg;
     }
 
     //------------------------------------------------
     // Produkt
     /***
-     * Metoden opretter et produkt objekt, relation til et produktkategori objekt og returnere det nye produkt objekt
+     * Metoden opretter et produkt objekt, gemmet det i Storage, relatere den til et produktkategori objekt og returnere det nye produkt objekt
      * @param navn String
      * @param stoerrelse double
      * @param lagerAntal int
@@ -81,7 +83,7 @@ public class Controller {
     }
 
     /***
-     * Metoden updatere et produkt objekt og dens relation et produktkategori objekt, samt opdatere den pris relationer
+     * Metoden updatere et produkt objekt og dens relation til et produktkategori objekt, samt opdatere dens pris relationer
      * @param navn String
      * @param stoerrelse double
      * @param lagerAntal int
@@ -104,6 +106,7 @@ public class Controller {
         for (Pris p : produkt.getPriser()) {
             Controller.deletePris(p);
         }
+        Storage.removeProdukt(produkt);
     }
 
     public static ArrayList<Prisliste> getProduktPrislister (Produkt p) {
@@ -119,7 +122,6 @@ public class Controller {
     // Prisliste
     public static Prisliste createPrisliste(String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
         Prisliste p1 = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
-        //p1.setPriser(priser);
         Storage.addPrisliste(p1);
         return p1;
     }
@@ -144,7 +146,7 @@ public class Controller {
         prisliste.setDatoSlut(datoSlut);
 
         for (Pris p : prisliste.getPriser()) {
-            p.getProdukt().getPriser().remove(p);
+            Controller.deletePris(p);
         }
 
         prisliste.setPriser(priser);

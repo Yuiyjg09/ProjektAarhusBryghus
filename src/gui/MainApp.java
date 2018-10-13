@@ -31,9 +31,8 @@ public class MainApp extends Application {
         stage.show();
     }
 
-    public static Alert createAlert(String title, String headerText, Stage owner) {
-        //Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    public static Alert createAlert(String title, String headerText, Stage owner, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.initOwner(owner);
         alert.setHeaderText(headerText);
@@ -42,8 +41,16 @@ public class MainApp extends Application {
     }
 
     public static Alert createErrAlert(String headerText, Stage owner) {
-        //Stage owner = (Stage) this.getScene().getWindow();
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(headerText);
+        alert.initOwner(owner);
+        alert.showAndWait();
+
+        return alert;
+    }
+
+    public static Alert createWarAlert(String headerText, Stage owner) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText(headerText);
         alert.initOwner(owner);
         alert.showAndWait();

@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static gui.MainApp.createAlert;
 import static gui.MainApp.createErrAlert;
+import static gui.MainApp.createWarAlert;
 
 
 public class ProduktkategoriPane extends GridPane {
@@ -108,13 +109,15 @@ public class ProduktkategoriPane extends GridPane {
     private void deleteAction() {
         Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
            if (pk != null) {
-               Alert alert = createAlert("Slet produktkategori", "Er du sikker på denne handling?", (Stage) this.getScene().getWindow());
+               Alert alert = createAlert("Slet produktkategori", "Er du sikker på at du vil slette: " + pk.getNavn() + "?"
+                       , (Stage) this.getScene().getWindow(), Alert.AlertType.CONFIRMATION);
 
                Optional<ButtonType> result = alert.showAndWait();
 
                if (result.isPresent() && result.get() == ButtonType.OK) {
-                   //Controller.deleteProduktkategori(pk);
-                   try {
+                   createWarAlert(Controller.deleteProduktkategori(pk),(Stage) this.getScene().getWindow());
+                   updateControls();
+                   /*try {
                        Controller.deleteProduktkategori(pk);
                        updateControls();
                    } catch (Exception e) {
@@ -122,10 +125,10 @@ public class ProduktkategoriPane extends GridPane {
                        TODO://Spørg Peter!
                        //lblError.setText(e.getMessage());
                        createErrAlert("OBS! denne produktkategori indeholder produkter og kan ikke slettes", (Stage)this.getScene().getWindow());
-                   }
+                   }*/
                }
            } else {
-               createErrAlert("Ups der skete en fejl - ingen produktkategori er valgt", (Stage) this.getScene().getWindow());
+               createErrAlert("Ingen produktkategori er valgt", (Stage) this.getScene().getWindow());
            }
     }
 
@@ -159,7 +162,7 @@ public class ProduktkategoriPane extends GridPane {
         Produkt p = lwProdukter.getSelectionModel().getSelectedItem();
 
         if (pk != null && p != null) {
-           Alert alert = createAlert("Slet produkt", "Er du sikker på denne handling?",(Stage) this.getScene().getWindow());
+           Alert alert = createAlert("Slet produkt", "Er du sikker på denne handling?",(Stage) this.getScene().getWindow(), Alert.AlertType.CONFIRMATION);
 
             Optional<ButtonType> result = alert.showAndWait();
 

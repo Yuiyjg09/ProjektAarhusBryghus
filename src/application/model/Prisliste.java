@@ -93,8 +93,8 @@ public class Prisliste {
     public void deletePris(Pris pris) {
         pris.getProdukt().removePris(pris);
         pris.getPrisliste().removePris(pris);
-        pris.setProdukt(null);
-        pris.setPrisliste(null);
+        //pris.setProdukt(null);
+        //pris.setPrisliste(null);
     }
 
     @Override

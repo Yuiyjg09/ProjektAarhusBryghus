@@ -22,6 +22,8 @@ import storage.Storage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static gui.MainApp.createErrAlert;
+
 public class OpretProduktWindow extends Stage {
     private Produktkategori produktkategori;
     private Produkt produkt;
@@ -147,31 +149,31 @@ public class OpretProduktWindow extends Stage {
         ArrayList<Pris> priser = new ArrayList<>();
 
         if (navn.length() < 1) {
-            createErrAlert("Der skal angives et produktnavn");
+            createErrAlert("Der skal angives et produktnavn", (Stage)this.getScene().getWindow());
             return;
         }
 
         try {
             stoerrelse = Double.parseDouble(txfStoerrelse.getText().trim());
         } catch (NumberFormatException e) {
-            createErrAlert("Størrelse skal angives decimal eller heltal");
+            createErrAlert("Størrelse skal angives decimal eller heltal", (Stage)this.getScene().getWindow());
             return;
         }
 
         try {
             lagerAntal = Integer.parseInt(txfLagerAntal.getText().trim());
         } catch (NumberFormatException e) {
-            createErrAlert("Lagerantal skal angives som heltal");
+            createErrAlert("Lagerantal skal angives som heltal",(Stage)this.getScene().getWindow());
             return;
         }
 
         if (pk == null) {
-            createErrAlert("Der skal angives en produktkategori");
+            createErrAlert("Der skal angives en produktkategori", (Stage)this.getScene().getWindow());
             return;
         }
 
         if (priserToAdd.size() < 1) {
-            createErrAlert("OBS! Produktet er ikke tilføjet en prisliste");
+            createErrAlert("OBS! Produktet er ikke tilføjet en prisliste", (Stage)this.getScene().getWindow());
             return;
         }
 
@@ -212,19 +214,19 @@ public class OpretProduktWindow extends Stage {
             try {
                 pris = Double.parseDouble(txfPris.getText().trim());
             } catch (NumberFormatException e) {
-                createErrAlert("Pris skal angives som decimal eller heltal");
+                createErrAlert("Pris skal angives som decimal eller heltal", (Stage)this.getScene().getWindow());
                 return;
             }
             if (!priserToAdd.containsKey(pl)) {
                 priserToAdd.put(pl, pris);
                 lwPrislisterToAdd.getItems().add(pl);
             } else {
-                createErrAlert("Produktet eksistere allerede på denne prisliste");
+                createErrAlert("Produktet eksistere allerede på denne prisliste", (Stage)this.getScene().getWindow());
             }
 
 
         } else {
-            createErrAlert("Ups - der er ikke valgt en prisliste");
+            createErrAlert("Ups - der er ikke valgt en prisliste", (Stage)this.getScene().getWindow());
         }
     }
 
@@ -235,28 +237,8 @@ public class OpretProduktWindow extends Stage {
             priserToAdd.remove(pl);
             lwPrislisterToAdd.getItems().remove(pl);
         } else {
-            createErrAlert("Ups - der er ikke valgt en prisliste");
+            createErrAlert("Ups - der er ikke valgt en prisliste",(Stage)this.getScene().getWindow());
         }
-    }
-
-    private Alert createAlert(String title, String headerText) {
-        Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.initOwner(owner);
-        alert.setHeaderText(headerText);
-
-        return alert;
-    }
-
-    private Alert createErrAlert(String headerText) {
-        Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText(headerText);
-        alert.initOwner(owner);
-        alert.showAndWait();
-
-        return alert;
     }
 
     private void initControls() {
