@@ -3,6 +3,7 @@ package gui;
 import application.controller.Controller;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
@@ -28,6 +29,26 @@ public class MainApp extends Application {
         Scene scene = new Scene(pane);
         stage.setScene(scene);
         stage.show();
+    }
+
+    public static Alert createAlert(String title, String headerText, Stage owner) {
+        //Stage owner = (Stage) this.getScene().getWindow();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.initOwner(owner);
+        alert.setHeaderText(headerText);
+
+        return alert;
+    }
+
+    public static Alert createErrAlert(String headerText, Stage owner) {
+        //Stage owner = (Stage) this.getScene().getWindow();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(headerText);
+        alert.initOwner(owner);
+        alert.showAndWait();
+
+        return alert;
     }
 
     //-------------------------------------------

@@ -7,17 +7,24 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
 import java.util.Optional;
 
+import static gui.MainApp.createAlert;
+import static gui.MainApp.createErrAlert;
+
 
 public class ProduktkategoriPane extends GridPane {
-    private Label lblProduktkategorier, lblProdukter, lblError;
+    private Label lblProduktkategorier, lblProdukter;
     private ListView<Produktkategori> lwProduktkategorier;
     private ListView<Produkt> lwProdukter;
     private Button btnOpret, btnSlet, btnUpdate, btnOpretProdukt, btnSletProdukt, btnUpdateProdukt;
+    private VBox vb1, vb2;
+    private HBox hb1;
 
     public ProduktkategoriPane() {
         this.setPadding(new Insets(20));
@@ -26,55 +33,47 @@ public class ProduktkategoriPane extends GridPane {
         this.setGridLinesVisible(false);
 
         lblProduktkategorier = new Label("Produktkategorier");
-        this.add(lblProduktkategorier,0,0);
-
         lblProdukter = new Label("Produkter");
-        this.add(lblProdukter, 1, 0);
-
-        lblError = new Label();
-        this.add(lblError, 0,5,2,1);
-
         lwProduktkategorier = new ListView<>();
-        this.add(lwProduktkategorier,0,1);
-
         lwProduktkategorier.getItems().addAll(Controller.getProduktkategorier());
-
-
         lwProdukter = new ListView<>();
-        this.add(lwProdukter,1,1);
 
         btnOpret = new Button("Opret");
-        this.add(btnOpret, 0,2);
         btnOpret.setOnAction(event -> this.createAction());
         btnOpret.setMaxWidth(Double.MAX_VALUE);
 
         btnUpdate = new Button("Update");
-        this.add(btnUpdate,0,3);
         btnUpdate.setOnAction(event -> this.updateAction());
         btnUpdate.setMaxWidth(Double.MAX_VALUE);
 
         btnSlet = new Button("Slet");
-        this.add(btnSlet,0,4);
         btnSlet.setOnAction(event -> this.deleteAction());
         btnSlet.setMaxWidth(Double.MAX_VALUE);
 
         btnOpretProdukt = new Button("Opret");
-        this.add(btnOpretProdukt, 1,2);
         btnOpretProdukt.setOnAction(event -> this.createProduktAction());
         btnOpretProdukt.setMaxWidth(Double.MAX_VALUE);
 
         btnUpdateProdukt = new Button("Update");
-        this.add(btnUpdateProdukt,1,3);
         btnUpdateProdukt.setOnAction(event -> this.updateProduktAction());
         btnUpdateProdukt.setMaxWidth(Double.MAX_VALUE);
 
         btnSletProdukt = new Button("Slet");
-        this.add(btnSletProdukt,1,4);
         btnSletProdukt.setOnAction(event -> this.deleteProduktAction());
         btnSletProdukt.setMaxWidth(Double.MAX_VALUE);
 
-        ChangeListener<Produktkategori> l1 = (op, oldProduktkategori, newProduktkategori) -> this.selectedProduktkategoriChanged();
-        lwProduktkategorier.getSelectionModel().selectedItemProperty().addListener(l1);
+        vb1 = new VBox(10);
+        vb1.getChildren().addAll(lblProduktkategorier,lwProduktkategorier,btnOpret,btnUpdate,btnSlet);
+
+        vb2 = new VBox(10);
+        vb2.getChildren().addAll(lblProdukter,lwProdukter,btnOpretProdukt,btnUpdateProdukt,btnSletProdukt);
+
+        hb1 = new HBox(50);
+        this.add(hb1,0,0);
+        hb1.getChildren().addAll(vb1,vb2);
+
+        ChangeListener<Produktkategori> pkListener = (op, oldObj, newObj) -> this.selectedProduktkategoriChanged();
+        lwProduktkategorier.getSelectionModel().selectedItemProperty().addListener(pkListener);
 
         this.updateControls();
     }
@@ -102,14 +101,14 @@ public class ProduktkategoriPane extends GridPane {
             win.showAndWait();
             updateControls();
         } else {
-            createErrAlert("Ups! Der er ikke valgt en produktkategori");
+            createErrAlert("Ups! Der er ikke valgt en produktkategori", (Stage)this.getScene().getWindow());
         }
     }
 
     private void deleteAction() {
         Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
            if (pk != null) {
-               Alert alert = createAlert("Slet produktkategori", "Er du sikker på denne handling?");
+               Alert alert = createAlert("Slet produktkategori", "Er du sikker på denne handling?", (Stage) this.getScene().getWindow());
 
                Optional<ButtonType> result = alert.showAndWait();
 
@@ -122,11 +121,11 @@ public class ProduktkategoriPane extends GridPane {
                        //e.printStackTrace();
                        TODO://Spørg Peter!
                        //lblError.setText(e.getMessage());
-                       createErrAlert("OBS! denne produktkategori indeholder produkter og kan ikke slettes");
+                       createErrAlert("OBS! denne produktkategori indeholder produkter og kan ikke slettes", (Stage)this.getScene().getWindow());
                    }
                }
            } else {
-               createErrAlert("Ups der skete en fejl - ingen produktkategori er valgt");
+               createErrAlert("Ups der skete en fejl - ingen produktkategori er valgt", (Stage) this.getScene().getWindow());
            }
     }
 
@@ -148,10 +147,10 @@ public class ProduktkategoriPane extends GridPane {
 
                 updateSelectedControls();
             } else {
-                createErrAlert("Ups! Der er ikke valgt et produkt");
+                createErrAlert("Ups! Der er ikke valgt et produkt", (Stage) this.getScene().getWindow());
             }
         } else {
-            createErrAlert("Ups! Der er ikke valgt en produktkategori");
+            createErrAlert("Ups! Der er ikke valgt en produktkategori", (Stage) this.getScene().getWindow());
         }
     }
 
@@ -160,7 +159,7 @@ public class ProduktkategoriPane extends GridPane {
         Produkt p = lwProdukter.getSelectionModel().getSelectedItem();
 
         if (pk != null && p != null) {
-           Alert alert = createAlert("Slet produkt", "Er du sikker på denne handling?");
+           Alert alert = createAlert("Slet produkt", "Er du sikker på denne handling?",(Stage) this.getScene().getWindow());
 
             Optional<ButtonType> result = alert.showAndWait();
 
@@ -169,29 +168,10 @@ public class ProduktkategoriPane extends GridPane {
                 updateSelectedControls();
             }
         } else {
-            createErrAlert("Ups der skete en fejl - intet produkt er valgt");
+            createErrAlert("Ups der skete en fejl - intet produkt er valgt",(Stage) this.getScene().getWindow());
         }
     }
 
-    public Alert createAlert(String title, String headerText) {
-        Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.initOwner(owner);
-        alert.setHeaderText(headerText);
-
-        return alert;
-    }
-
-    public Alert createErrAlert(String headerText) {
-        Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText(headerText);
-        alert.initOwner(owner);
-        alert.showAndWait();
-
-        return alert;
-    }
 
     private void updateSelectedControls() {
         int selectedIndex = lwProduktkategorier.getSelectionModel().getSelectedIndex();

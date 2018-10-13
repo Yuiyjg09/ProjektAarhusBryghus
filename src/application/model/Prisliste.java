@@ -2,6 +2,7 @@ package application.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Prisliste {
     private String navn;
@@ -9,12 +10,25 @@ public class Prisliste {
     private LocalDateTime datoStart;
     private LocalDateTime datoSlut;
     private ArrayList<Pris> priser = new ArrayList<Pris>();
+    private HashMap<Produkt, Double> priser2 = new HashMap<>();
 
     public Prisliste(String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
         this.navn = navn;
         this.beskrivelse = beskrivelse;
         this.datoStart = datoStart;
         this.datoSlut = datoSlut;
+    }
+
+    public HashMap<Produkt, Double> getPriser2() {
+        return new HashMap<>(priser2);
+    }
+
+    public void setPriser2(HashMap<Produkt, Double> priser2) {
+        this.priser2 = priser2;
+    }
+
+    public void addProduktPris(double pris, Produkt produkt) {
+        this.priser2.put(produkt,pris);
     }
 
     public String getNavn() {

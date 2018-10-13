@@ -28,7 +28,7 @@ public class Controller {
     }
 
     /***
-     * Metode opdatere et produktkategori objekt
+     * Metoden opdatere et produktkategori objekt
      * @param navn String
      * @param beskrivelse String
      * @param metrik Metrik
@@ -61,7 +61,7 @@ public class Controller {
     //------------------------------------------------
     // Produkt
     /***
-     * Metoden opretter et produkt objekt, relationer til oprettede pris-objekter, relation til et produktkategori objekt og returnere det nye produkt objekt
+     * Metoden opretter et produkt objekt, relation til et produktkategori objekt og returnere det nye produkt objekt
      * @param navn String
      * @param stoerrelse double
      * @param lagerAntal int
@@ -81,7 +81,7 @@ public class Controller {
     }
 
     /***
-     * Metoden updatere et produkt objekt og dens relation et produktkategori objekt, samt opdatere dens relation til Pris
+     * Metoden updatere et produkt objekt og dens relation et produktkategori objekt, samt opdatere den pris relationer
      * @param navn String
      * @param stoerrelse double
      * @param lagerAntal int
