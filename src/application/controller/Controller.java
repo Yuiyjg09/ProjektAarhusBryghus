@@ -3,8 +3,10 @@ package application.controller;
 import application.model.*;
 import storage.Storage;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Controller {
 
@@ -200,12 +202,39 @@ public class Controller {
         antal.getSalg().removeAntal(antal);
     }
 
+
+    //------------------------------------------------
+    // Dage
+    public static void addDayToPrisliste(DayOfWeek day, Prisliste prisliste) {
+        if (!prisliste.getGyldigeDage().contains(day)) {
+            prisliste.addDayOfWeek(day);
+        }
+    }
+
+    public static void removeDayFromPrisliste(DayOfWeek day, Prisliste prisliste) {
+        if (prisliste.getGyldigeDage().contains(day)) {
+            prisliste.removeDayOfWeek(day);
+        }
+    }
+
+    public static void addAllDaysToPrisliste(Prisliste prisliste) {
+        resetDage(prisliste);
+        prisliste.setGyldigeDage(new ArrayList<>(Arrays.asList(DayOfWeek.values())));
+    }
+
+    public static void resetDage(Prisliste prisliste) {
+        prisliste.setGyldigeDage(new ArrayList<>());
+    }
+
     //------------------------------------------------
     // Initialize Storage
     public static void initStorage() {
 
         Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", null, null);
         Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", null, null);
+
+        Controller.addAllDaysToPrisliste(pl1);
+        Controller.addDayToPrisliste(DayOfWeek.FRIDAY, pl2);
 
         Produktkategori pk1 = Controller.createProduktkategori("Flaske øl", "Indeholder alle varianter af flaske øl", Maalbar.CL);
         Produktkategori pk2 = Controller.createProduktkategori("Fadøl", "Indeholder alle varianter af fadøl", Maalbar.CL);

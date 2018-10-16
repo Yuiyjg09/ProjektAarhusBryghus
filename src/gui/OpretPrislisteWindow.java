@@ -5,11 +5,14 @@ import application.model.Pris;
 import application.model.Prisliste;
 import application.model.Produkt;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +28,7 @@ class OpretPrislisteWindow extends Stage {
     private Produkt produktSelected, produktToRemove;
     private HashMap<Produkt, Double> priser = new HashMap<>();
     private Prisliste prislisten = null;
+    private CheckBox[] dage = new CheckBox[DayOfWeek.values().length];
 
     OpretPrislisteWindow() {
         GridPane pane = new GridPane();
@@ -121,6 +125,16 @@ class OpretPrislisteWindow extends Stage {
         ChangeListener<Produkt> produktAddChangeListener = (opitem, olditem, newitem) -> this.selectChangeListnerAdded();
         lvwTilfoejet.getSelectionModel().selectedItemProperty().addListener(produktAddChangeListener);
 
+        //Dage
+        Label lbldage = new Label("Dage");
+        gridPane.add(lbldage, 2, 3);
+        HBox box = new HBox(7);
+        for (int i = 0; i < DayOfWeek.values().length; i++) {
+            CheckBox dag = dage[i] = new CheckBox(DayOfWeek.of(i + 1).name());
+            box.getChildren().add(dag);
+        }
+        gridPane.add(box, 2, 4);
+
         //Buttons
         Button btnAdd = new Button("Tilføj");
         gridPane.add(btnAdd, 1, 10);
@@ -185,7 +199,8 @@ class OpretPrislisteWindow extends Stage {
         if(!txfNavn.getText().isEmpty()
                 && !txfDatoStart.getText().isEmpty()
                 && !txfDatoSlut.getText().isEmpty()
-                && !txaBeskrivelse.getText().isEmpty()) {
+                && !txaBeskrivelse.getText().isEmpty()
+                && isDagSelected()) {
             try {
                 LocalDateTime dtStart = LocalDateTime.of(dpStart.getValue(), LocalTime.parse(txfDatoStart.getText(), DateTimeFormatter.ofPattern("HH-mm")));
                 LocalDateTime dtSlut = LocalDateTime.of(dpSlut.getValue(), LocalTime.parse(txfDatoSlut.getText(), DateTimeFormatter.ofPattern("HH-mm")));
@@ -214,6 +229,14 @@ class OpretPrislisteWindow extends Stage {
                         priser.keySet()) {
                     Controller.createPris(Double.parseDouble(priser.get(key).toString()), key, prisliste);
                 }
+                Controller.resetDage(prisliste);
+
+                for (CheckBox box:
+                        dage) {
+                    if (box.isSelected()) {
+                        Controller.addDayToPrisliste(DayOfWeek.valueOf(box.getText()), prisliste);
+                    }
+                }
 
                 this.close();
             } catch (DateTimeParseException e) {
@@ -230,6 +253,16 @@ class OpretPrislisteWindow extends Stage {
             alert.setTitle("Indtast info om den nye prisliste");
             alert.showAndWait();
         }
+    }
+
+    private boolean isDagSelected() {
+        for (CheckBox dag:
+             dage) {
+            if (dag.isSelected()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void cancelAction() {

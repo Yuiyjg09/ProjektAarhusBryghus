@@ -1,5 +1,6 @@
 package application.model;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 public class Antal {
@@ -40,11 +41,21 @@ public class Antal {
     public double beregnPris() {
         LocalDateTime dateTime = LocalDateTime.MAX;
         double prisen = 0.0;
+
+        for (Pris pris:
+             getProdukt().getPriser()) {
+            if(pris.getPrisliste().getDatoStart() == null
+                && pris.getPrisliste().getDatoSlut() == null) {
+                prisen = pris.getPris();
+            }
+        }
+
         for (Pris pris:
              getProdukt().getPriser()) {
             if (pris.getPrisliste().getDatoSlut().isBefore(dateTime)
                 && pris.getPrisliste().getDatoSlut().isAfter(this.getSalg().getSalgsdato())
-                && pris.getPrisliste().getDatoStart().isBefore(this.getSalg().getSalgsdato())) {
+                && pris.getPrisliste().getDatoStart().isBefore(this.getSalg().getSalgsdato())
+                && pris.getPrisliste().getGyldigeDage().contains(LocalDateTime.now().getDayOfWeek())) {
                 dateTime = pris.getPrisliste().getDatoSlut();
                 prisen = pris.getPris();
             }
