@@ -3,6 +3,7 @@ package application.controller;
 import application.model.*;
 import storage.Storage;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -121,8 +122,17 @@ public class Controller {
     //------------------------------------------------
     // Prisliste
     public static Prisliste createPrisliste(String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
-        Prisliste p1 = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
-        Storage.addPrisliste(p1);
+        Prisliste p1 = null;
+        try {
+            if (datoStart.isBefore(datoSlut) || datoStart.isEqual(datoSlut)) {
+                p1 = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
+                Storage.addPrisliste(p1);
+            } else {
+                throw new DateTimeException("dato mismatch");
+            }
+        } catch (DateTimeException e) {
+            e.printStackTrace();
+        }
         return p1;
     }
 
