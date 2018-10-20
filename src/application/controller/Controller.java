@@ -174,6 +174,17 @@ public class Controller {
         salg.betal(isBetalt, betalingsmetode);
     }
 
+    public static ArrayList<Salg> getSalgForToday() {
+        ArrayList<Salg> result = new ArrayList<>();
+        for (Salg salg:
+             Storage.getSalgs()) {
+            if (salg.getSalgsdato().toLocalDate() == LocalDate.now()) {
+                result.add(salg);
+            }
+        }
+        return result;
+    }
+
     //------------------------------------------------
     // Antal
 
