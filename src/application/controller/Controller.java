@@ -1,10 +1,11 @@
 package application.controller;
-
 import application.model.*;
 import storage.Storage;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -46,18 +47,11 @@ public class Controller {
      * Metoden fjerner et produktkategori objekt fra storage, hvis den ikke indeholder nogen tilknyttede produkter
      * @param produktkategori Produktkategori
      */
-    public static void deleteProduktkategori(Produktkategori produktkategori) {
-        try
-        {
-            if (produktkategori.getProdukter().isEmpty()) {
-                Storage.removeProduktkategori(produktkategori);
-            } else {
-                throw new Exception("Denne kategori har tilhørende produkter");
-            }
-        }
-         catch (Exception e) {
-            e.getMessage();
-            //e.printStackTrace();
+    public static void deleteProduktkategori(Produktkategori produktkategori) throws Exception {
+        if (produktkategori.getProdukter().isEmpty()) {
+            Storage.removeProduktkategori(produktkategori);
+        } else {
+            throw new Exception("Denne kategori har tilhørende produkter");
         }
     }
 
@@ -91,14 +85,13 @@ public class Controller {
      * @param produktkategori Produktkategori
      * @param produkt Produkt
      */
-    public static void updateProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, Produkt produkt, ArrayList<Pris> priser) {
+    public static void updateProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, Produkt produkt) {
         produkt.setNavn(navn);
         produkt.setStoerrelse(stoerrelse);
         produkt.setLagerAntal(lagerAntal);
         produkt.getKategori().removeProdukt(produkt);
         produkt.setKategori(produktkategori);
         produktkategori.addProdukt(produkt);
-        produkt.setPriser(priser);
     }
 
     public static void deleteprodukt(Produkt produkt) {
@@ -138,23 +131,12 @@ public class Controller {
      * @param beskrivelse String
      * @param datoStart Datetime
      * @param datoSlut Datetime
-     * @param priser ArrayList
      */
-    public static void updatePrisliste(Prisliste prisliste, String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut, ArrayList<Pris> priser) {
+    public static void updatePrisliste(Prisliste prisliste, String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
         prisliste.setNavn(navn);
         prisliste.setBeskrivelse(beskrivelse);
         prisliste.setDatoStart(datoStart);
         prisliste.setDatoSlut(datoSlut);
-
-        for (Pris p : prisliste.getPriser()) {
-            p.getProdukt().getPriser().remove(p);
-        }
-
-        prisliste.setPriser(priser);
-
-        for (Pris p2 : priser) {
-            p2.getProdukt().addPris(p2);
-        }
     }
 
     public static void deletePrisliste (Prisliste prisliste) {
@@ -227,11 +209,13 @@ public class Controller {
     }
 
     //------------------------------------------------
-    // Initialize Storage
+    // Initialize Storages
     public static void initStorage() {
 
-        Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", null, null);
-        Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", null, null);
+        Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(10, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(10, 0)));
+        Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(15, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(19, 0)));
 
         Controller.addAllDaysToPrisliste(pl1);
         Controller.addDayToPrisliste(DayOfWeek.FRIDAY, pl2);

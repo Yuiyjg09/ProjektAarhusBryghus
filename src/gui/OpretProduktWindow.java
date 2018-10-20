@@ -5,6 +5,7 @@ import application.model.Pris;
 import application.model.Prisliste;
 import application.model.Produkt;
 import application.model.Produktkategori;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -14,15 +15,20 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import storage.Storage;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
-public class OpretProduktWindow extends Stage {
+class OpretProduktWindow extends Stage {
     private Produktkategori produktkategori;
-    private Produkt produkt;
+    private Produkt produktet;
+    private Prisliste prislisteSelected, prislisteToRemove;
+    private HashMap<Prisliste, Double> priser = new HashMap<>();
+    private TextField txfNavn, txfStoerrelse, txfLagerAntal, txfPris;
+    private ListView<Prisliste> lvwPrislisteSelected, lvwPrislisteToRemove;
+    private ComboBox<Produktkategori> cbPk;
 
-    public OpretProduktWindow(String title, Produktkategori produktkategori, Produkt produkt) {
+    OpretProduktWindow(String title, Produktkategori produktkategori, Produkt produkt) {
         this.produktkategori = produktkategori;
-        this.produkt = produkt;
+        this.produktet = produkt;
         this.initStyle(StageStyle.UTILITY);
         this.initModality(Modality.APPLICATION_MODAL);
         this.setResizable(false);
@@ -36,15 +42,9 @@ public class OpretProduktWindow extends Stage {
 
     }
 
-    public OpretProduktWindow(String title) {
+    OpretProduktWindow(String title) {
         this(title, null, null);
     }
-
-    private Label lblNavn, lblStoerrelse, lblLagerAntal, lblPk, lblPl1, lblPl2, lblPris, lblError;
-    private TextField txfNavn, txfStoerrelse, txfLagerAntal, txfPris;
-    private ListView<Prisliste> lwPl1, lwPl2;
-    private Button btnAdd, btnRemove, btnOk, btnCancel;
-    private ComboBox<Produktkategori> cbPk;
 
     private void initContent(GridPane pane) {
         pane.setPadding(new Insets(10));
@@ -52,28 +52,28 @@ public class OpretProduktWindow extends Stage {
         pane.setVgap(10);
         pane.setGridLinesVisible(false);
 
-        lblNavn = new Label("Angiv navn:");
+        Label lblNavn = new Label("Angiv navn:");
         pane.add(lblNavn,0,0);
 
-        lblStoerrelse = new Label("Angiv størrelse:");
+        Label lblStoerrelse = new Label("Angiv størrelse:");
         pane.add(lblStoerrelse, 0,2);
 
-        lblPk = new Label("Vælg produktkategori:");
-        pane.add(lblPk, 1,0);
+        Label lblProduktKategori = new Label("Vælg produktkategori:");
+        pane.add(lblProduktKategori, 1,0);
 
-        lblLagerAntal = new Label("Angiv lagerantal:");
+        Label lblLagerAntal = new Label("Angiv lagerantal:");
         pane.add(lblLagerAntal, 1,2);
 
-        lblPl1 = new Label("Mulige prislister:");
-        pane.add(lblPl1, 0,4);
+        Label lblPrislister = new Label("Mulige prislister:");
+        pane.add(lblPrislister, 0,4);
 
-        lblPl2 = new Label("Mulige prislister:");
-        pane.add(lblPl2, 2,4);
+        Label lblPrislisterAdded = new Label("Mulige prislister:");
+        pane.add(lblPrislisterAdded, 2,4);
 
-        lblPris = new Label("Angiv pris (DKK):");
+        Label lblPris = new Label("Angiv pris (DKK):");
         pane.add(lblPris,1,4);
 
-        lblError = new Label("");
+        Label lblError = new Label("");
         pane.add(lblError, 0,8,1,3);
 
         txfNavn = new TextField();
@@ -92,43 +92,129 @@ public class OpretProduktWindow extends Stage {
         pane.add(cbPk,1,1);
         cbPk.getItems().addAll(Storage.getProduktkategorier());
 
-        lwPl1 = new ListView<>();
-        pane.add(lwPl1,0,5, 1,4);
-        lwPl1.getItems().addAll(Storage.getPrislister());
+        ChangeListener<Produktkategori> produktkategoriChangeListener = (oitempk, olditempk, newitempk) -> this.selectChangeListenerProduktKategori();
+        cbPk.getSelectionModel().selectedItemProperty().addListener(produktkategoriChangeListener);
 
-        lwPl1 = new ListView<>();
-        pane.add(lwPl1,2,5,1,4);
+        lvwPrislisteSelected = new ListView<>();
+        pane.add(lvwPrislisteSelected,0,5, 1,4);
+        lvwPrislisteSelected.getItems().addAll(Storage.getPrislister());
 
-        btnAdd = new Button("Tilføj");
+        ChangeListener<Prisliste> prislisteChangeListener = (oitem, olditem, newitem) -> this.selectChangeListenerPrislisteSelected();
+        lvwPrislisteSelected.getSelectionModel().selectedItemProperty().addListener(prislisteChangeListener);
+
+        lvwPrislisteToRemove = new ListView<>();
+        pane.add(lvwPrislisteToRemove,2,5,1,4);
+        lvwPrislisteToRemove.getItems().addAll();
+
+        ChangeListener<Prisliste> prislisteAddedChangeListener = (oitem1, olditem1, newitem1) -> this.selectChangeListenerPrislisteToRemove();
+        lvwPrislisteToRemove.getSelectionModel().selectedItemProperty().addListener(prislisteAddedChangeListener);
+
+        Button btnAdd = new Button("Tilføj");
         pane.add(btnAdd,1,6);
+        btnAdd.setOnAction(event -> this.addAction());
 
-        btnRemove = new Button("Fjern");
+        Button btnRemove = new Button("Fjern");
         pane.add(btnRemove,1,7);
+        btnRemove.setOnAction(event -> this.removeAction());
 
-        btnOk = new Button("Ok");
+        Button btnOk = new Button("Ok");
         pane.add(btnOk, 0,9);
+        btnOk.setOnAction(event -> this.okAction());
 
-        btnCancel = new Button("Cancel");
+        Button btnCancel = new Button("Afbryd");
         pane.add(btnCancel, 2,9);
+        btnCancel.setOnAction(event -> this.cancelAction());
 
         initControls();
     }
 
-    private void okAction() {}
+    private void selectChangeListenerProduktKategori() { produktkategori = cbPk.getSelectionModel().getSelectedItem(); }
 
-    private void cancelAction() {}
+    private void selectChangeListenerPrislisteSelected() { prislisteSelected = lvwPrislisteSelected.getSelectionModel().getSelectedItem(); }
 
-    private void addAction() {}
+    private void selectChangeListenerPrislisteToRemove() { prislisteToRemove = lvwPrislisteToRemove.getSelectionModel().getSelectedItem(); }
 
-    private void removeAction() {}
+    private void okAction() {
+        if (!txfNavn.getText().isEmpty()
+            && !txfStoerrelse.getText().isEmpty()
+            && !txfLagerAntal.getText().isEmpty()
+            && produktkategori != null) {
+            try {
+                int lagerantal = Integer.parseInt(txfLagerAntal.getText());
+                double stoerrelse = Double.parseDouble(txfStoerrelse.getText());
+                if (produktet != null) {
+                    Controller.updateProdukt(txfNavn.getText(), stoerrelse, lagerantal, produktkategori, produktet);
+                } else {
+                    produktet = Controller.createProdukt(txfNavn.getText(), stoerrelse, lagerantal, produktkategori);
+                }
+                for (Pris pris :
+                        produktet.getPriser()) {
+                    Controller.deletePris(pris);
+                }
+                for (Prisliste key :
+                        priser.keySet()) {
+                    Controller.createPris(priser.get(key), produktet, key);
+                }
+
+                this.close();
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Indtast en gyldig pris");
+                alert.setTitle("Ugyldig Pris");
+                alert.showAndWait();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Indtast manglende information");
+            alert.setTitle("Manglende Information");
+            alert.showAndWait();
+        }
+    }
+
+    private void cancelAction() {this.close();}
+
+    private void addAction() {
+        if (prislisteSelected != null
+            && !lvwPrislisteToRemove.getItems().contains(prislisteSelected)
+            && !txfPris.getText().isEmpty()) {
+            lvwPrislisteToRemove.getItems().add(prislisteSelected);
+            try {
+                priser.put(prislisteSelected, Double.parseDouble(txfPris.getText()));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Indtast en gyldig pris");
+                alert.setTitle("Manglende Pris");
+                alert.showAndWait();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Ingen prisliste valgt/Ingen pris/Produktet er allerede tilføjet");
+            alert.setTitle("Fejl");
+            alert.showAndWait();
+        }
+    }
+
+    private void removeAction() {
+        if (prislisteToRemove != null && lvwPrislisteToRemove.getItems().contains(prislisteToRemove)) {
+            lvwPrislisteToRemove.getItems().remove(prislisteToRemove);
+            priser.remove(prislisteToRemove);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Ingen Prisliste valgt");
+            alert.setTitle("Fejl");
+            alert.showAndWait();
+        }
+    }
 
     private void initControls() {
-        if (produkt != null) {
-            txfNavn.setText(produkt.getNavn());
-            txfStoerrelse.setText("" + produkt.getStoerrelse());
-            txfLagerAntal.setText("" + produkt.getLagerAntal());
-            cbPk.setValue(produkt.getKategori());
-            lwPl2.getItems().addAll(Controller.getProduktPrislister(produkt));
+        if (produktet != null) {
+            txfNavn.setText(produktet.getNavn());
+            txfStoerrelse.setText("" + produktet.getStoerrelse());
+            txfLagerAntal.setText("" + produktet.getLagerAntal());
+            cbPk.setValue(produktet.getKategori());
+            lvwPrislisteToRemove.getItems().addAll(Controller.getProduktPrislister(produktet));
         }
     }
 
