@@ -102,9 +102,9 @@ public class Controller {
         }
     }
 
-    public static ArrayList<Prisliste> getProduktPrislister (Produkt p) {
+    public static ArrayList<Prisliste> getProduktPrislister (Produkt produkt) {
         ArrayList<Prisliste> prisliste = new ArrayList<>();
-        for (Pris pris : p.getPriser()) {
+        for (Pris pris : produkt.getPriser()) {
             prisliste.add(pris.getPrisliste());
         }
 
@@ -114,10 +114,9 @@ public class Controller {
     //------------------------------------------------
     // Prisliste
     public static Prisliste createPrisliste(String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
-        Prisliste p1 = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
-        //p1.setPriser(priser);
-        Storage.addPrisliste(p1);
-        return p1;
+        Prisliste prisliste = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
+        Storage.addPrisliste(prisliste);
+        return prisliste;
     }
 
     public static ArrayList<Prisliste> getPrislister() {
@@ -140,8 +139,8 @@ public class Controller {
     }
 
     public static void deletePrisliste (Prisliste prisliste) {
-        for (Pris p : prisliste.getPriser()) {
-            p.getProdukt().getPriser().remove(p);
+        for (Pris pris : prisliste.getPriser()) {
+            pris.getProdukt().getPriser().remove(pris);
         }
 
         Storage.removePrisliste(prisliste);
@@ -188,9 +187,10 @@ public class Controller {
     //------------------------------------------------
     // Antal
 
-    public static void createAntal(Produkt produkt, Salg salg, int antal) {
-        salg.createAntal(produkt, antal);
+    public static Antal createAntal(Produkt produkt, Salg salg, int antal) {
+        return salg.createAntal(produkt, antal);
     }
+
     public static void deleteAntal(Antal antal) {
         antal.getSalg().removeAntal(antal);
     }

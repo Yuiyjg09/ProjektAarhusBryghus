@@ -16,15 +16,17 @@ public class Salg {
         this.isBetalt = false;
         this.betalingsmetode = null;
         this.antalProdukter = new ArrayList<>();
+        this.totalPris = 0.0;
     }
 
     public ArrayList<Antal> getAntalProdukter() {
         return new ArrayList<Antal>(antalProdukter);
     }
 
-    public void createAntal(Produkt produkt, int antal) {
+    public Antal createAntal(Produkt produkt, int antal) {
         Antal antal1 = new Antal(produkt, this, antal);
         this.addAntal(antal1);
+        return antal1;
     }
 
     public void deleteAntal(Antal antal) {
@@ -90,5 +92,16 @@ public class Salg {
             prisTotal += antal.beregnPris();
         }
         this.totalPris = prisTotal;
+    }
+
+    @Override
+    public String toString() {
+        return "Salg{" +
+                "salgsdato=" + salgsdato +
+                ", isBetalt=" + isBetalt +
+                ", totalPris=" + totalPris +
+                ", betalingsmetode=" + betalingsmetode +
+                ", antalProdukter=" + antalProdukter +
+                '}';
     }
 }

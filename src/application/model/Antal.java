@@ -55,11 +55,19 @@ public class Antal {
             if (pris.getPrisliste().getDatoSlut().isBefore(dateTime)
                 && pris.getPrisliste().getDatoSlut().isAfter(this.getSalg().getSalgsdato())
                 && pris.getPrisliste().getDatoStart().isBefore(this.getSalg().getSalgsdato())
-                && pris.getPrisliste().getGyldigeDage().contains(LocalDateTime.now().getDayOfWeek())) {
+                && pris.getPrisliste().getGyldigeDage().contains(LocalDateTime.now().getDayOfWeek())
+                //  && pris.getPrisliste().getDatoSlut().toLocalTime().isBefore(this.getSalg().getSalgsdato().toLocalTime())
+            //    && pris.getPrisliste().getDatoStart().toLocalTime().isAfter(this.getSalg().getSalgsdato().toLocalTime())
+            ) {
                 dateTime = pris.getPrisliste().getDatoSlut();
                 prisen = pris.getPris();
             }
         }
         return prisen * this.getAntal();
+    }
+
+    @Override
+    public String toString() {
+        return produkt.toString() + ", antal: " + antal + ", pris: " + beregnPris() + " DKK";
     }
 }
