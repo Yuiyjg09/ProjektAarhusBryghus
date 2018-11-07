@@ -1,5 +1,6 @@
 package application.model;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -8,6 +9,7 @@ public class Prisliste {
     private String beskrivelse;
     private LocalDateTime datoStart;
     private LocalDateTime datoSlut;
+    private ArrayList<DayOfWeek> gyldigeDage = new ArrayList<>();
     private ArrayList<Pris> priser = new ArrayList<Pris>();
 
     public Prisliste(String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
@@ -65,10 +67,11 @@ public class Prisliste {
         this.priser = priser;
     }
 
-    public void createPris(double stkpris, Produkt produkt) {
+    public Pris createPris(double stkpris, Produkt produkt) {
         Pris pris = new Pris(stkpris, produkt, this);
         produkt.addPris(pris);
         this.addPris(pris);
+        return pris;
     }
 
     public void updatePris(double stkpris, Pris pris) {
@@ -82,12 +85,28 @@ public class Prisliste {
         pris.setPrisliste(null);
     }
 
+    public ArrayList<DayOfWeek> getGyldigeDage() {
+        return new ArrayList<DayOfWeek>(gyldigeDage);
+    }
+
+    public void setGyldigeDage(ArrayList<DayOfWeek> gyldigeDage) {
+        this.gyldigeDage = gyldigeDage;
+    }
+
+    public void addDayOfWeek(DayOfWeek day) {
+        gyldigeDage.add(day);
+    }
+
+    public void removeDayOfWeek(DayOfWeek day) {
+        gyldigeDage.remove(day);
+    }
+
     @Override
     public String toString() {
         if (priser == null) {
-            return navn + " (ingen)";
+            return navn + " (ingen), " + gyldigeDage.toString();
         } else {
-            return navn + " (" + priser.size() + ")";
+            return navn + " (" + priser.size() + "), " + gyldigeDage.toString();
         }
     }
 }

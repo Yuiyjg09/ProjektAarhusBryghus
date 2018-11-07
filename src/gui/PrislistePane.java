@@ -28,10 +28,10 @@ class PrislistePane extends GridPane {
         this.setVgap(10);
         this.setGridLinesVisible(false);
 
-        Label lblPrislister = new Label("Prislister");
+        Label lblPrislister = new Label("Prislister:");
         this.add(lblPrislister,0,0);
 
-        Label lblProdukter = new Label("Produkter");
+        Label lblProdukter = new Label("Produkter (i den valgte prisliste):");
         this.add(lblProdukter,1,0);
 
         lwPrislister = new ListView<>();
@@ -63,7 +63,7 @@ class PrislistePane extends GridPane {
         updateControls();
     }
 
-    private void updateControls() {
+    void updateControls() {
         int selectedIndex = lwPrislister.getSelectionModel().getSelectedIndex();
         lwPrislister.getItems().setAll(Controller.getPrislister());
         lwPrislister.getSelectionModel().select(selectedIndex);
@@ -110,17 +110,22 @@ class PrislistePane extends GridPane {
 
     private void removeAction() {
         if (pl1 != null) {
-            Stage owner = (Stage) this.getScene().getWindow();
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Slet Prisliste");
-            alert.initOwner(owner);
-            alert.setHeaderText("Er du sikker?");
+            if (!pl1.getNavn().equals("Klippekort") && !pl1.getNavn().equals("Rundvisninger") && !pl1.getNavn().equals("GaveAesker")) {
+                Stage owner = (Stage) this.getScene().getWindow();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Er du sikker på at du vil slette prislisten?", ButtonType.YES, ButtonType.NO);
+                alert.setTitle("Slet Prisliste");
 
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                Controller.deletePrisliste(pl1);
-                lwPrislister.getItems().setAll(Controller.getPrislister());
-                updateControls();
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    Controller.deletePrisliste(pl1);
+                    lwPrislister.getItems().setAll(Controller.getPrislister());
+                    updateControls();
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Fejl - Kan ikke slettes");
+                alert.setContentText("Denne prisliste kan ikke slettes, da den er uundværlig for systemet");
+                alert.showAndWait();
             }
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

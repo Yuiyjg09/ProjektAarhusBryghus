@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="ProjektAarhusBryghus:jar">
+    <output-path>$USER_HOME$/OneDrive/EAAA</output-path>
+    <root id="archive" name="ProjektAarhusBryghus_jar.jar">
+      <element id="archive" name="ProjektAarhusBryghus.jar">
+        <element id="module-output" name="ProjektAarhusBryghus" />
+        <element id="module-test-output" name="ProjektAarhusBryghus" />
+      </element>
+      <element id="library" level="module" name="JUnit4" module-name="ProjektAarhusBryghus" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

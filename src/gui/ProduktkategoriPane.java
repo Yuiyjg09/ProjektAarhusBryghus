@@ -1,143 +1,178 @@
 package gui;
 
-import application.controller.Controller;
-import application.model.Produkt;
-import application.model.Produktkategori;
-import javafx.beans.value.ChangeListener;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+        import application.controller.Controller;
+        import application.model.GaveAeske;
+        import application.model.Pris;
+        import application.model.Produkt;
+        import application.model.Produktkategori;
+        import javafx.beans.value.ChangeListener;
+        import javafx.geometry.Insets;
+        import javafx.scene.control.*;
+        import javafx.scene.layout.GridPane;
+        import javafx.scene.layout.HBox;
+
+        import java.util.Optional;
 
 
-import java.util.Optional;
+class ProduktkategoriPane extends GridPane {
+    private ListView<Produktkategori> lvwProduktkategorier;
+    private ListView<Produkt> lvwProdukter;
+    private ListView<GaveAeske> lvwGaveAeske;
+    private GaveAeske gaveAesket;
 
-
-public class ProduktkategoriPane extends GridPane {
-    private Label lblProduktkategorier, lblProdukter, lblError;
-    private ListView<Produktkategori> lwProduktkategorier;
-    private ListView<Produkt> lwProdukter;
-    private Button btnOpret, btnSlet, btnUpdate, btnOpretProdukt, btnSletProdukt, btnUpdateProdukt;
-
-    public ProduktkategoriPane() {
+    ProduktkategoriPane() {
         this.setPadding(new Insets(20));
         this.setHgap(20);
         this.setVgap(10);
         this.setGridLinesVisible(false);
 
-        lblProduktkategorier = new Label("Produktkategorier");
+        //Labels
+        Label lblProduktkategorier = new Label("Produktkategorier:");
         this.add(lblProduktkategorier,0,0);
 
-        lblProdukter = new Label("Produkter");
+        Label lblProdukter = new Label("Produkter (i den valgte produktkategori):");
         this.add(lblProdukter, 1, 0);
 
-        lblError = new Label();
-        this.add(lblError, 0,5,2,1);
+        lvwProduktkategorier = new ListView<>();
+        this.add(lvwProduktkategorier,0,1);
+        lvwProduktkategorier.getItems().setAll(Controller.getProduktkategorier());
 
-        lwProduktkategorier = new ListView<>();
-        this.add(lwProduktkategorier,0,1);
+        lvwProdukter = new ListView<>();
+        this.add(lvwProdukter,1,1);
 
-        lwProduktkategorier.getItems().addAll(Controller.getProduktkategorier());
+        //GaveAeske listview
+        Label lblGaveAesker = new Label("GaveAesker:");
+        this.add(lblGaveAesker,2,0);
 
+        lvwGaveAeske = new ListView<>();
+        this.add(lvwGaveAeske,2,1);
+        lvwGaveAeske.getItems().setAll(Controller.getGaveAesker());
 
-        lwProdukter = new ListView<>();
-        this.add(lwProdukter,1,1);
+        ChangeListener<GaveAeske> gaveAeskeChangeListener = (oitem2, olditem2, newitem2) -> this.selectedGaveAeskeChanged();
+        lvwGaveAeske.getSelectionModel().selectedItemProperty().addListener(gaveAeskeChangeListener);
 
-        btnOpret = new Button("Opret");
-        this.add(btnOpret, 0,2);
+        //Produktkategori buttons & HBox
+        HBox produktkategoriHBox = new HBox();
+        this.add(produktkategoriHBox, 0, 2);
+
+        Button btnOpret = new Button("Opret Produktkategori");
+        produktkategoriHBox.getChildren().add(btnOpret);
         btnOpret.setOnAction(event -> this.createAction());
-        btnOpret.setMaxWidth(Double.MAX_VALUE);
 
-        btnUpdate = new Button("Update");
-        this.add(btnUpdate,0,3);
+        Button btnUpdate = new Button("Rediger Produktkategori");
+        produktkategoriHBox.getChildren().add(btnUpdate);
         btnUpdate.setOnAction(event -> this.updateAction());
-        btnUpdate.setMaxWidth(Double.MAX_VALUE);
 
-        btnSlet = new Button("Slet");
-        this.add(btnSlet,0,4);
+        Button btnSlet = new Button("Slet Produktkategori");
+        this.add(btnSlet,0,3);
         btnSlet.setOnAction(event -> this.deleteAction());
-        btnSlet.setMaxWidth(Double.MAX_VALUE);
 
-        btnOpretProdukt = new Button("Opret");
-        this.add(btnOpretProdukt, 1,2);
+        //Produkt buttons & HBox
+        HBox produktHBox = new HBox();
+        this.add(produktHBox,1,2);
+
+        Button btnOpretProdukt = new Button("Opret Produkt");
+        produktHBox.getChildren().add(btnOpretProdukt);
         btnOpretProdukt.setOnAction(event -> this.createProduktAction());
-        btnOpretProdukt.setMaxWidth(Double.MAX_VALUE);
 
-        btnUpdateProdukt = new Button("Update");
-        this.add(btnUpdateProdukt,1,3);
+        Button btnUpdateProdukt = new Button("Rediger Produkt");
+        produktHBox.getChildren().add(btnUpdateProdukt);
         btnUpdateProdukt.setOnAction(event -> this.updateProduktAction());
-        btnUpdateProdukt.setMaxWidth(Double.MAX_VALUE);
 
-        btnSletProdukt = new Button("Slet");
-        this.add(btnSletProdukt,1,4);
+        Button btnSletProdukt = new Button("Slet Produkt");
+        produktHBox.getChildren().add(btnSletProdukt);
         btnSletProdukt.setOnAction(event -> this.deleteProduktAction());
-        btnSletProdukt.setMaxWidth(Double.MAX_VALUE);
+
+        //GaveAeske buttons
+        HBox hBox = new HBox();
+        this.add(hBox,2,2);
+
+        Button btnOpretGaveAeske = new Button("Opret Gaveæske");
+        hBox.getChildren().add(btnOpretGaveAeske);
+        btnOpretGaveAeske.setOnAction(event -> this.createGaveAeskeAction());
+
+        Button btnSletGaveAeske = new Button("Slet GaveAeske");
+        hBox.getChildren().add(btnSletGaveAeske);
+        btnSletGaveAeske.setOnAction(event -> this.deleteGaveAeskeAction());
 
         ChangeListener<Produktkategori> l1 = (op, oldProduktkategori, newProduktkategori) -> this.selectedProduktkategoriChanged();
-        lwProduktkategorier.getSelectionModel().selectedItemProperty().addListener(l1);
+        lvwProduktkategorier.getSelectionModel().selectedItemProperty().addListener(l1);
 
         this.updateControls();
     }
 
     private void selectedProduktkategoriChanged() {
-        lwProdukter.getItems().clear();
-        Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
+        Produktkategori pk = lvwProduktkategorier.getSelectionModel().getSelectedItem();
         if (pk != null) {
-            lwProdukter.getItems().addAll(pk.getProdukter());
+            lvwProdukter.getItems().setAll(pk.getProdukter());
         }
+    }
 
+    private void selectedGaveAeskeChanged() {
+        gaveAesket = lvwGaveAeske.getSelectionModel().getSelectedItem();
     }
 
     private void createAction() {
         OpretProduktkategoriWindow win = new OpretProduktkategoriWindow("Opret produktkategori");
         win.showAndWait();
+
         updateControls();
     }
 
     private void updateAction() {
-        Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
+        Produktkategori pk = lvwProduktkategorier.getSelectionModel().getSelectedItem();
 
         if(pk != null) {
             OpretProduktkategoriWindow win = new OpretProduktkategoriWindow("Rediger produktkategori",pk);
             win.showAndWait();
         } else {
-            lblError.setText("Der er ikke valgt en produktkategori");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Fejl - Ingen Produktkategori valgt");
+            alert.setContentText("Ingen Produktkategori valgt - Vælg venligst en produktkategori");
+            alert.showAndWait();
         }
     }
 
     private void deleteAction() {
-        Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
-           if (pk != null) {
-               Alert alert = createAlert("Slet produktkategori", "Er du sikker på denne handling?");
+        Produktkategori produktkategori = lvwProduktkategorier.getSelectionModel().getSelectedItem();
+        if (produktkategori != null) {
+            if (!produktkategori.getNavn().equals("Klippekort") && !produktkategori.getNavn().equals("Rundvisninger")) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Er du sikker på at du vil slette produktkategorien?", ButtonType.YES, ButtonType.NO);
 
-               Optional<ButtonType> result = alert.showAndWait();
+                Optional<ButtonType> result = alert.showAndWait();
 
-               if (result.isPresent() && result.get() == ButtonType.OK) {
-                   //Controller.deleteProduktkategori(pk);
-                   try {
-                       Controller.deleteProduktkategori(pk);
-                       updateControls();
-                   } catch (Exception e) {
-                       //e.printStackTrace();
-                       TODO://Spørg Peter!
-                       lblError.setText(e.getMessage());
-                   }
-               }
-           } else {
-               Alert errAlert = createErrAlert("Ups der skete en fejl - ingen produktkategori er valgt");
-           }
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    try {
+                        Controller.deleteProduktkategori(produktkategori);
+                        updateSelectedControls();
+                    } catch (Exception e) {
+                        Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                        alert1.setTitle("Fejl - Produktkategorien har produkter i sig");
+                        alert1.setContentText("Produktkategorien har produkter i sig - Fjern først produkterne fra produktkategorien for at slette den");
+                        alert1.showAndWait();
+                    }
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Kan ikke slettes");
+                alert.setContentText("Denne Produktkategori er uundværelig for systemet - Den kan derfor ikke slettes");
+                alert.showAndWait();
+            }
+        }
     }
 
     private void createProduktAction() {
-            OpretProduktWindow win = new OpretProduktWindow("Opret produkt");
-            win.showAndWait();
+        OpretProduktWindow win = new OpretProduktWindow("Opret produkt");
+        win.showAndWait();
 
-            updateSelectedControls();
+
+        updateSelectedControls();
+
     }
 
     private void updateProduktAction() {
-        Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
-        Produkt p = lwProdukter.getSelectionModel().getSelectedItem();
+        Produktkategori pk = lvwProduktkategorier.getSelectionModel().getSelectedItem();
+        Produkt p = lvwProdukter.getSelectionModel().getSelectedItem();
 
         if(pk != null && p != null) {
             OpretProduktWindow win = new OpretProduktWindow("Rediger produkt",pk, p);
@@ -145,58 +180,74 @@ public class ProduktkategoriPane extends GridPane {
 
             updateSelectedControls();
         } else {
-            lblError.setText("Der er ikke valgt en produktkategori eller produkt");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Fejl - Intet Produkt valgt");
+            alert.setContentText("Intet Produkt valgt - Vælg venligst et produkt");
+            alert.showAndWait();
         }
     }
 
     private void deleteProduktAction() {
-        Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
-        Produkt p = lwProdukter.getSelectionModel().getSelectedItem();
+        Produktkategori pk = lvwProduktkategorier.getSelectionModel().getSelectedItem();
+        Produkt p = lvwProdukter.getSelectionModel().getSelectedItem();
 
         if (pk != null && p != null) {
-           Alert alert = createAlert("Slet produkt", "Er du sikker på denne handling?");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Er du sikker på, at du vil slette produktet?", ButtonType.YES, ButtonType.NO);
 
             Optional<ButtonType> result = alert.showAndWait();
 
-            if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (result.isPresent() && result.get() == ButtonType.YES) {
                 Controller.deleteprodukt(p);
                 updateSelectedControls();
             }
-        } else {
-            Alert errAlert = createErrAlert("Ups der skete en fejl - intet produkt er valgt");
         }
     }
 
-    public Alert createAlert(String title, String headerText) {
-        Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.initOwner(owner);
-        alert.setHeaderText(headerText);
+    private void createGaveAeskeAction() {
+        OpretGaveAeskeWindow opretGaveAeskeWindow = new OpretGaveAeskeWindow();
+        opretGaveAeskeWindow.showAndWait();
 
-        return alert;
+        updateSelectedControls();
     }
 
-    public Alert createErrAlert(String headerText) {
-        Stage owner = (Stage) this.getScene().getWindow();
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText(headerText);
-        alert.initOwner(owner);
-        alert.showAndWait();
+    private void deleteGaveAeskeAction() {
+        if (gaveAesket != null) {
+            for (Produkt produkt:
+                    gaveAesket.getIndhold().keySet()) {
+                produkt.setLagerAntal(produkt.getLagerAntal() + gaveAesket.getIndhold().get(produkt));
+            }
+            for (Pris pris:
+                    gaveAesket.getPriser()) {
+                Controller.getGaveAeskePrisliste().deletePris(pris);
+            }
 
-        return alert;
+            Controller.deleteGaveAeske(gaveAesket);
+
+            updateSelectedControls();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Fejl - Ingen Gaveæske valgt");
+            alert.setContentText("Ingen Gaveæske valgt - Vælg venligst en gaveæske for at fortsætte");
+            alert.showAndWait();
+        }
     }
 
     private void updateSelectedControls() {
-        int selectedIndex = lwProduktkategorier.getSelectionModel().getSelectedIndex();
-        lwProduktkategorier.getSelectionModel().select(selectedIndex);
-        Produktkategori pk = lwProduktkategorier.getSelectionModel().getSelectedItem();
-        lwProdukter.getItems().clear();
-        lwProdukter.getItems().addAll(pk.getProdukter());
+        if (lvwProduktkategorier.getSelectionModel().getSelectedItem() != null) {
+            int selectedIndex = lvwProduktkategorier.getSelectionModel().getSelectedIndex();
+            lvwProduktkategorier.getItems().setAll(Controller.getProduktkategorier());
+            lvwProduktkategorier.getSelectionModel().select(selectedIndex);
+            Produktkategori pk = lvwProduktkategorier.getSelectionModel().getSelectedItem();
+            lvwProdukter.getItems().setAll(pk.getProdukter());
+        }
+        int selectedIndex = lvwGaveAeske.getSelectionModel().getSelectedIndex();
+        lvwGaveAeske.getItems().setAll(Controller.getGaveAesker());
+        lvwGaveAeske.getSelectionModel().select(selectedIndex);
+        gaveAesket = lvwGaveAeske.getSelectionModel().getSelectedItem();
+
     }
 
-    public void updateControls() {
-        lwProduktkategorier.getItems().clear();
-        lwProduktkategorier.getItems().addAll(Controller.getProduktkategorier());
+    void updateControls() {
+        lvwProduktkategorier.getItems().setAll(Controller.getProduktkategorier());
     }
 }

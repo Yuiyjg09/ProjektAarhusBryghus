@@ -8,8 +8,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +28,7 @@ class OpretPrislisteWindow extends Stage {
     private Produkt produktSelected, produktToRemove;
     private HashMap<Produkt, Double> priser = new HashMap<>();
     private Prisliste prislisten = null;
+    private CheckBox[] dage = new CheckBox[DayOfWeek.values().length];
 
     OpretPrislisteWindow() {
         GridPane pane = new GridPane();
@@ -58,9 +62,9 @@ class OpretPrislisteWindow extends Stage {
         gridPane.add(lblDatoStart, 0, 2);
         dpStart = new DatePicker();
         gridPane.add(dpStart, 0, 3);
-        txfDatoStart = new TextField("HH-mm");
+        txfDatoStart = new TextField("HH:mm");
         gridPane.add(txfDatoStart, 1, 3);
-        if (prislisten != null) {
+        if (prislisten != null && prislisten.getDatoStart() != null) {
             dpStart.setValue(prislisten.getDatoStart().toLocalDate());
             txfDatoStart.setText(prislisten.getDatoStart().toLocalTime().toString());
         }
@@ -70,9 +74,9 @@ class OpretPrislisteWindow extends Stage {
         gridPane.add(lblDatoSlut, 0, 5);
         dpSlut = new DatePicker();
         gridPane.add(dpSlut, 0, 6);
-        txfDatoSlut = new TextField("HH-mm");
+        txfDatoSlut = new TextField("HH:mm");
         gridPane.add(txfDatoSlut, 1, 6);
-        if (prislisten != null) {
+        if (prislisten != null && prislisten.getDatoSlut() != null) {
             dpSlut.setValue(prislisten.getDatoSlut().toLocalDate());
             txfDatoSlut.setText(prislisten.getDatoSlut().toLocalTime().toString());
         }
@@ -97,10 +101,12 @@ class OpretPrislisteWindow extends Stage {
         lvwProdukter.getSelectionModel().selectedItemProperty().addListener(produktChangeListener);
 
         //Pris
+        VBox prisVBox = new VBox();
+        gridPane.add(prisVBox, 1, 8);
         Label lblPris = new Label("Pris: ");
-        gridPane.add(lblPris, 1, 8);
+        prisVBox.getChildren().add(lblPris);
         txfPris = new TextField();
-        gridPane.add(txfPris, 1, 9);
+        prisVBox.getChildren().add(txfPris);
 
         //Produkter tilføjet
         Label lblProdukterTilfoejet = new Label("Produkter Tilføjet");
@@ -121,13 +127,31 @@ class OpretPrislisteWindow extends Stage {
         ChangeListener<Produkt> produktAddChangeListener = (opitem, olditem, newitem) -> this.selectChangeListnerAdded();
         lvwTilfoejet.getSelectionModel().selectedItemProperty().addListener(produktAddChangeListener);
 
+        //Dage
+        Label lbldage = new Label("Dage");
+        gridPane.add(lbldage, 2, 3);
+        HBox box = new HBox(7);
+        for (int i = 0; i < DayOfWeek.values().length; i++) {
+            CheckBox dag = dage[i] = new CheckBox(DayOfWeek.of(i + 1).name());
+            box.getChildren().add(dag);
+        }
+        gridPane.add(box, 2, 4);
+        if (prislisten != null) {
+            for (CheckBox dag :
+                    dage) {
+                if (prislisten.getGyldigeDage().contains(DayOfWeek.valueOf(dag.getText()))) {
+                    dag.setSelected(true);
+                }
+            }
+        }
+
         //Buttons
         Button btnAdd = new Button("Tilføj");
-        gridPane.add(btnAdd, 1, 10);
+        prisVBox.getChildren().add(btnAdd);
         btnAdd.setOnAction(event -> this.addAction());
 
         Button btnRemove = new Button("Fjern");
-        gridPane.add(btnRemove, 1, 11);
+        prisVBox.getChildren().add(btnRemove);
         btnRemove.setOnAction(event -> this.removeAction());
 
         Button btnOK = new Button("Opret Prisliste");
@@ -149,16 +173,21 @@ class OpretPrislisteWindow extends Stage {
 
     private void addAction() {
         if (produktSelected != null
-                && !lvwTilfoejet.getItems().contains(produktSelected)
-                && !txfPris.getText().isEmpty()) {
-            lvwTilfoejet.getItems().add(produktSelected);
-            try {
-                priser.put(produktSelected, Double.parseDouble(txfPris.getText()));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
+                && !lvwTilfoejet.getItems().contains(produktSelected)) {
+            if (!txfPris.getText().isEmpty()) {
+                lvwTilfoejet.getItems().add(produktSelected);
+                try {
+                    priser.put(produktSelected, Double.parseDouble(txfPris.getText()));
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Fejl - Forkert pris-format");
+                    alert.setContentText("Forkert pris-format - Indtast venligst en gyldig pris");
+                    alert.showAndWait();
+                }
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setContentText("Indtast en gyldig pris");
-                alert.setTitle("Fejl");
+                alert.setContentText("Manglende pris - Indtast venligst en gyldig pris");
+                alert.setTitle("Fejl - Manglende pris");
                 alert.showAndWait();
             }
         } else {
@@ -185,34 +214,35 @@ class OpretPrislisteWindow extends Stage {
         if(!txfNavn.getText().isEmpty()
                 && !txfDatoStart.getText().isEmpty()
                 && !txfDatoSlut.getText().isEmpty()
-                && !txaBeskrivelse.getText().isEmpty()) {
+                && !txaBeskrivelse.getText().isEmpty()
+                && isDagSelected()) {
             try {
-                LocalDateTime dtStart = LocalDateTime.of(dpStart.getValue(), LocalTime.parse(txfDatoStart.getText(), DateTimeFormatter.ofPattern("HH-mm")));
-                LocalDateTime dtSlut = LocalDateTime.of(dpSlut.getValue(), LocalTime.parse(txfDatoSlut.getText(), DateTimeFormatter.ofPattern("HH-mm")));
-                Prisliste prisliste;
+                LocalDateTime dtStart = LocalDateTime.of(dpStart.getValue(), LocalTime.parse(txfDatoStart.getText(), DateTimeFormatter.ofPattern("HH:mm")));
+                LocalDateTime dtSlut = LocalDateTime.of(dpSlut.getValue(), LocalTime.parse(txfDatoSlut.getText(), DateTimeFormatter.ofPattern("HH:mm")));
+
                 if (prislisten != null) {
-                    prisliste = prislisten;
-                    prisliste.setNavn(txfNavn.getText());
-                    prisliste.setDatoStart(dtStart);
-                    prisliste.setDatoSlut(dtSlut);
-                    prisliste.setBeskrivelse(txaBeskrivelse.getText());
-                    for (Pris pris:
-                         prisliste.getPriser()) {
-                        priser.put(pris.getProdukt(), pris.getPris());
-                    }
+                    Controller.updatePrisliste(prislisten, txfNavn.getText(), txaBeskrivelse.getText(), dtStart, dtSlut);
                 } else {
-                    prisliste = Controller.createPrisliste(txfNavn.getText(),
+                    prislisten = Controller.createPrisliste(txfNavn.getText(),
                             txaBeskrivelse.getText(),
                             dtStart,
                             dtSlut);
                 }
                 for (Pris pris:
-                        prisliste.getPriser()) {
+                        prislisten.getPriser()) {
                     Controller.deletePris(pris);
                 }
                 for (Produkt key:
                         priser.keySet()) {
-                    Controller.createPris(Double.parseDouble(priser.get(key).toString()), key, prisliste);
+                    Controller.createPris(Double.parseDouble(priser.get(key).toString()), key, prislisten);
+                }
+                Controller.resetDage(prislisten);
+
+                for (CheckBox box:
+                        dage) {
+                    if (box.isSelected()) {
+                        Controller.addDayToPrisliste(DayOfWeek.valueOf(box.getText()), prislisten);
+                    }
                 }
 
                 this.close();
@@ -230,6 +260,16 @@ class OpretPrislisteWindow extends Stage {
             alert.setTitle("Indtast info om den nye prisliste");
             alert.showAndWait();
         }
+    }
+
+    private boolean isDagSelected() {
+        for (CheckBox dag:
+             dage) {
+            if (dag.isSelected()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void cancelAction() {

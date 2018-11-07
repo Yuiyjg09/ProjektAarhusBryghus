@@ -3,7 +3,6 @@ package gui;
 import application.controller.Controller;
 import application.model.Maalbar;
 import application.model.Produktkategori;
-import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -12,10 +11,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class OpretProduktkategoriWindow extends Stage {
+class OpretProduktkategoriWindow extends Stage {
     private Produktkategori produktkategori;
 
-    public OpretProduktkategoriWindow(String title, Produktkategori produktkategori) {
+    OpretProduktkategoriWindow(String title, Produktkategori produktkategori) {
         this.produktkategori = produktkategori;
         this.initStyle(StageStyle.UTILITY);
         this.initModality(Modality.APPLICATION_MODAL);
@@ -30,15 +29,13 @@ public class OpretProduktkategoriWindow extends Stage {
 
     }
 
-    public OpretProduktkategoriWindow(String title) {
+    OpretProduktkategoriWindow(String title) {
         this(title, null);
     }
 
-    private Label lblNavn, lblMetrik, lblBeksrivelse, lblError;
     private TextField txfnavn;
     private ComboBox cbMetrik;
     private TextArea txaBeskrivelse;
-    private Button btnOk, btnCancel;
 
     private void initContent(GridPane pane) {
         pane.setPadding(new Insets(10));
@@ -46,13 +43,13 @@ public class OpretProduktkategoriWindow extends Stage {
         pane.setVgap(10);
         pane.setGridLinesVisible(false);
 
-        lblNavn = new Label("Angiv navn");
+        Label lblNavn = new Label("Angiv navn");
         pane.add(lblNavn, 0,0);
 
-        lblMetrik = new Label("Vælg metrik");
+        Label lblMetrik = new Label("Vælg metrik");
         pane.add(lblMetrik, 0,2);
 
-        lblBeksrivelse = new Label("Angiv beskrivelse");
+        Label lblBeksrivelse = new Label("Angiv beskrivelse");
         pane.add(lblBeksrivelse, 1,0);
 
         txfnavn = new TextField();
@@ -65,15 +62,12 @@ public class OpretProduktkategoriWindow extends Stage {
         txaBeskrivelse = new TextArea();
         pane.add(txaBeskrivelse, 1,1,1,4);
 
-        lblError = new Label();
-        pane.add(lblError,0,5,2,1);
-
-        btnOk = new Button("Ok");
+        Button btnOk = new Button("Opret");
         pane.add(btnOk,0,6);
         btnOk.setOnAction(event -> this.okAction());
         btnOk.setMaxWidth(Double.MAX_VALUE);
 
-        btnCancel = new Button("Cancel");
+        Button btnCancel = new Button("Afbryd");
         pane.add(btnCancel,1,6);
         btnCancel.setOnAction(event -> this.cancelAction());
         btnCancel.setMaxWidth(Double.MAX_VALUE);
@@ -86,18 +80,34 @@ public class OpretProduktkategoriWindow extends Stage {
         Maalbar metrik = (Maalbar) cbMetrik.getSelectionModel().getSelectedItem();
         String beskrivelse = txaBeskrivelse.getText().trim();
 
-        if (navn.length() < 1 || beskrivelse.length() < 1 || metrik == null) {
-            lblError.setText("Udfyld venligst alle felter");
-            return;
-        }
+        if (metrik != null) {
+            if (beskrivelse.length() > 0) {
+                if (navn.length() > 0) {
+                    if (produktkategori != null) {
+                        Controller.updateProduktkategori(navn, beskrivelse, metrik, produktkategori);
+                    } else {
+                        Controller.createProduktkategori(navn, beskrivelse, metrik);
+                    }
 
-        if (produktkategori != null) {
-            Controller.updateProduktkategori(navn, beskrivelse, metrik, produktkategori);
+                    this.hide();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setContentText("Manglende Navn - Indtast venligst et navn");
+                    alert.setTitle("Fejl - Manglende Navn");
+                    alert.showAndWait();
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Manglende Beskrivelse - Indtast venligst en beskrivelse");
+                alert.setTitle("Fejl - Manglende Beskrivelse");
+                alert.showAndWait();
+            }
         } else {
-            Controller.createProduktkategori(navn,beskrivelse,metrik);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Manglende Metrik - Vælg Venligst en Metrik");
+            alert.setTitle("Fejl - Manglende Metrik");
+            alert.showAndWait();
         }
-
-        this.hide();
     }
 
     private void cancelAction() {

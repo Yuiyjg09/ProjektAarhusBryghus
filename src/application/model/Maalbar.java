@@ -1,5 +1,5 @@
 package application.model;
 
 public enum Maalbar {
-    STK, L, KG, STR, KLIP, CL
+    Stk, L, kg, Str, KLIP, cL, m, cm, mm, g,
 }

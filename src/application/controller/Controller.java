@@ -1,10 +1,13 @@
 package application.controller;
-
 import application.model.*;
 import storage.Storage;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Controller {
 
@@ -44,17 +47,12 @@ public class Controller {
      * Metoden fjerner et produktkategori objekt fra storage, hvis den ikke indeholder nogen tilknyttede produkter
      * @param produktkategori Produktkategori
      */
-    public static void deleteProduktkategori(Produktkategori produktkategori) {
-        try
-        {
-            if (produktkategori.getProdukter().isEmpty()) {
-                Storage.removeProduktkategori(produktkategori);
-            } else {
-                throw new Exception("Denne kategori har tilhørende produkter");
-            }
-        }
-         catch (Exception e) {
-            e.printStackTrace();
+
+    public static void deleteProduktkategori(Produktkategori produktkategori) throws Exception {
+        if (produktkategori.getProdukter().isEmpty()) {
+            Storage.removeProduktkategori(produktkategori);
+        } else {
+            throw new Exception("Denne kategori har tilhørende produkter");
         }
     }
 
@@ -80,6 +78,17 @@ public class Controller {
         return Storage.getProdukter();
     }
 
+    public static ArrayList<Produkt> getProdukterOutOfStock() {
+        ArrayList<Produkt> outOfStock = new ArrayList<>();
+        for (Produkt produkt:
+             getProdukter()) {
+            if (produkt.getLagerAntal() == 0) {
+                outOfStock.add(produkt);
+            }
+        }
+        return outOfStock;
+    }
+
     /***
      * Metoden updatere et produkt objekt og dens relation et produktkategori objekt, samt opdatere dens relation til Pris
      * @param navn String
@@ -88,14 +97,13 @@ public class Controller {
      * @param produktkategori Produktkategori
      * @param produkt Produkt
      */
-    public static void updateProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, Produkt produkt, ArrayList<Pris> priser) {
+    public static void updateProdukt(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, Produkt produkt) {
         produkt.setNavn(navn);
         produkt.setStoerrelse(stoerrelse);
         produkt.setLagerAntal(lagerAntal);
         produkt.getKategori().removeProdukt(produkt);
         produkt.setKategori(produktkategori);
         produktkategori.addProdukt(produkt);
-        produkt.setPriser(priser);
     }
 
     public static void deleteprodukt(Produkt produkt) {
@@ -104,11 +112,12 @@ public class Controller {
         for (Pris p : produkt.getPriser()) {
             Controller.deletePris(p);
         }
+        Storage.removeProdukt(produkt);
     }
 
-    public static ArrayList<Prisliste> getProduktPrislister (Produkt p) {
+    public static ArrayList<Prisliste> getProduktPrislister(Produkt produkt) {
         ArrayList<Prisliste> prisliste = new ArrayList<>();
-        for (Pris pris : p.getPriser()) {
+        for (Pris pris : produkt.getPriser()) {
             prisliste.add(pris.getPrisliste());
         }
 
@@ -118,10 +127,9 @@ public class Controller {
     //------------------------------------------------
     // Prisliste
     public static Prisliste createPrisliste(String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
-        Prisliste p1 = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
-        //p1.setPriser(priser);
-        Storage.addPrisliste(p1);
-        return p1;
+        Prisliste prisliste = new Prisliste(navn, beskrivelse, datoStart, datoSlut);
+        Storage.addPrisliste(prisliste);
+        return prisliste;
     }
 
     public static ArrayList<Prisliste> getPrislister() {
@@ -135,28 +143,17 @@ public class Controller {
      * @param beskrivelse String
      * @param datoStart Datetime
      * @param datoSlut Datetime
-     * @param priser ArrayList
      */
-    public static void updatePrisliste(Prisliste prisliste, String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut, ArrayList<Pris> priser) {
+    public static void updatePrisliste(Prisliste prisliste, String navn, String beskrivelse, LocalDateTime datoStart, LocalDateTime datoSlut) {
         prisliste.setNavn(navn);
         prisliste.setBeskrivelse(beskrivelse);
         prisliste.setDatoStart(datoStart);
         prisliste.setDatoSlut(datoSlut);
-
-        for (Pris p : prisliste.getPriser()) {
-            p.getProdukt().getPriser().remove(p);
-        }
-
-        prisliste.setPriser(priser);
-
-        for (Pris p2 : priser) {
-            p2.getProdukt().addPris(p2);
-        }
     }
 
     public static void deletePrisliste (Prisliste prisliste) {
-        for (Pris p : prisliste.getPriser()) {
-            p.getProdukt().getPriser().remove(p);
+        for (Pris pris : prisliste.getPriser()) {
+            pris.getProdukt().getPriser().remove(pris);
         }
 
         Storage.removePrisliste(prisliste);
@@ -173,14 +170,236 @@ public class Controller {
     }
 
     //------------------------------------------------
-    // Initialize Storage
+    // Salg
+
+    public static Salg createSalg() {
+        Salg salg = new Salg();
+        Storage.addSalg(salg);
+        return salg;
+    }
+
+    public static void deleteSalg(Salg salg) {
+        Storage.removeSalg(salg);
+    }
+
+    public static void betal(Salg salg, boolean isBetalt, Sellable betalingsmetode) {
+        salg.betal(isBetalt, betalingsmetode);
+    }
+
+    public static ArrayList<Salg> getSalgForToday() {
+        ArrayList<Salg> result = new ArrayList<>();
+        for (Salg salg:
+             Storage.getSalgs()) {
+            if (salg.getSalgsdato().toLocalDate().equals(LocalDate.now())) {
+                result.add(salg);
+            }
+        }
+        for (Udlejning udlejning:
+             Storage.getUdlejnings()) {
+            if (udlejning.getSalgsdato().toLocalDate().equals(LocalDate.now())) {
+                result.add(udlejning);
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Salg> getSalg() {
+        return Storage.getSalgs();
+    }
+
+    //------------------------------------------------
+    // Antal
+
+    public static Antal createAntal(Produkt produkt, Salg salg, int antal) {
+        return salg.createAntal(produkt, antal);
+    }
+
+    public static void deleteAntal(Antal antal) {
+        antal.getSalg().removeAntal(antal);
+    }
+
+    //------------------------------------------------
+    // Udlejning
+
+    public static Udlejning createUdlejning(double pant, LocalDate datoStart, LocalDate datoSlut) {
+        Udlejning udlejning = new Udlejning(pant, datoStart, datoSlut);
+        Storage.addUdlejning(udlejning);
+        return udlejning;
+    }
+
+    public static void betalPant(Udlejning udlejning, Sellable pantBetalingsmetode) {
+        udlejning.betalPant(pantBetalingsmetode);
+    }
+
+    public static ArrayList<Udlejning> getUdlejninger() {
+        return Storage.getUdlejnings();
+    }
+
+    public static ArrayList<Udlejning> getAktiveUdlejninger() {
+        ArrayList<Udlejning> aktiveUdlejninger = new ArrayList<>();
+        for (Udlejning udlejning:
+                getUdlejninger()) {
+            if (udlejning.getDatoSlut().isAfter(LocalDate.now())
+                    || !udlejning.isBetalt()) {
+                aktiveUdlejninger.add(udlejning);
+            }
+        }
+        return aktiveUdlejninger;
+    }
+
+    //------------------------------------------------
+    // Dage
+    public static void addDayToPrisliste(DayOfWeek day, Prisliste prisliste) {
+        if (!prisliste.getGyldigeDage().contains(day)) {
+            prisliste.addDayOfWeek(day);
+        }
+    }
+
+    public   static void addAllDaysToPrisliste(Prisliste prisliste) {
+        resetDage(prisliste);
+        prisliste.setGyldigeDage(new ArrayList<>(Arrays.asList(DayOfWeek.values())));
+    }
+
+    public static void resetDage(Prisliste prisliste) {
+        prisliste.setGyldigeDage(new ArrayList<>());
+    }
+
+    //------------------------------------------------
+    //Klippekort
+    public static Klippekort createKlippekort(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, int klip) {
+        Klippekort klippekort = new Klippekort(navn, stoerrelse, lagerAntal, produktkategori, klip);
+        Storage.addKlippekort(klippekort);
+        return klippekort;
+    }
+
+    public static ArrayList<Klippekort> getAktiveKlippekort() {
+        ArrayList<Klippekort> aktiveKlippekorts = new ArrayList<>();
+        for (Klippekort klippekort:
+             Storage.getKlippekorts()) {
+            if (klippekort.getKlip() > 0) {
+                aktiveKlippekorts.add(klippekort);
+            }
+        }
+        return aktiveKlippekorts;
+    }
+
+    public static Produktkategori getKlippekortKategori() {
+        Produktkategori produktkategorien = null;
+        for (Produktkategori produktkategori:
+             Storage.getProduktkategorier()) {
+            if (produktkategori.getNavn().equals("Klippekort")) {
+                produktkategorien = produktkategori;
+            }
+        }
+        return produktkategorien;
+    }
+
+    public static Prisliste getKlippekortPrisliste() {
+        Prisliste prislisten = null;
+        for (Prisliste prisliste:
+             Storage.getPrislister()) {
+            if (prisliste.getNavn().equals("Klippekort")) {
+                prislisten = prisliste;
+            }
+        }
+        return prislisten;
+    }
+
+    //------------------------------------------------
+    //Gaveæske
+    public static GaveAeske createGaveAeske(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori) {
+        GaveAeske gaveAeske = new GaveAeske(navn, stoerrelse, lagerAntal, produktkategori);
+        Storage.addGaveAeske(gaveAeske);
+//        Storage.addProdukt(gaveAeske);
+        return gaveAeske;
+    }
+
+    public static void deleteGaveAeske(GaveAeske gaveAeske) {
+        Storage.removeGaveAeske(gaveAeske);
+    }
+
+    public static void addIndholdToGaveAeske(GaveAeske gaveAeske, Produkt produkt, int antal) {
+        gaveAeske.putIndhold(produkt, antal);
+    }
+
+    public static Prisliste getGaveAeskePrisliste() {
+        for (Prisliste prisliste:
+             getPrislister()) {
+            if (prisliste.getNavn().equals("GaveAesker")){
+                return prisliste;
+            }
+        }
+        return null;
+    }
+
+    public static ArrayList<GaveAeske> getGaveAesker() {
+        return Storage.getGaveAesker();
+    }
+
+    //------------------------------------------------
+    //Rundvisning
+    public static Rundvisning createRundvisning(String navn, double stoerrelse, int lagerAntal, Produktkategori produktkategori, LocalDate dato, LocalTime start, LocalTime slut) {
+        Rundvisning rundvisning = new Rundvisning(navn,stoerrelse,lagerAntal,produktkategori, dato, start, slut);
+        Storage.addRundvisning(rundvisning);
+        return rundvisning;
+    }
+
+    public static ArrayList<Rundvisning> getAktiveRundvisninger() {
+        ArrayList<Rundvisning> rundvisninger = new ArrayList<>();
+        for (Rundvisning rundvisning:
+                Storage.getRundvisninger()) {
+            if (!rundvisning.getDato().isBefore(LocalDate.now().plusDays(1))) {
+                rundvisninger.add(rundvisning);
+            }
+        }
+        return rundvisninger;
+    }
+
+    public static Produktkategori getRundvisningsproduktkategori() {
+        for (Produktkategori produktkategori:
+             getProduktkategorier()) {
+            if (produktkategori.getNavn().equals("Rundvisninger")) {
+                return produktkategori;
+            }
+        }
+        return null;
+    }
+
+    public static Prisliste getRundvisningsPrisliste() {
+        for (Prisliste prisliste:
+             getPrislister()) {
+            if (prisliste.getNavn().equals("Rundvisninger")) {
+                return prisliste;
+            }
+        }
+        return null;
+    }
+
+    //------------------------------------------------
+    // Initialize Storages
     public static void initStorage() {
 
-        Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", LocalDateTime.now(), LocalDateTime.now().plusDays(10));
-        Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", LocalDateTime.now(), LocalDateTime.now().plusDays(10));
+        Prisliste pl1 = Controller.createPrisliste("Butik","Standard butikspriser", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(1, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(23, 0)));
+        Prisliste pl2 = Controller.createPrisliste("Fredagsbar","Fredagsbar priser", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(15, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(19, 0)));
+        Prisliste pl3 = Controller.createPrisliste("Klippekort","Priser for Klippekort", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(1, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(23, 0)));
+        Prisliste pl4 = Controller.createPrisliste("Rundvisninger","Priser for Rundvisninger", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(1, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(23, 0)));
+        Prisliste pl5 = Controller.createPrisliste("GaveAesker","Priser for Gaveæsker", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(1, 0)),
+                LocalDateTime.of(LocalDate.of(2030, 1, 1), LocalTime.of(23, 0)));
 
-        Produktkategori pk1 = Controller.createProduktkategori("Flaske øl", "Indeholder alle varianter af flaske øl", Maalbar.CL);
-        Produktkategori pk2 = Controller.createProduktkategori("Fadøl", "Indeholder alle varianter af fadøl", Maalbar.CL);
+        Controller.addAllDaysToPrisliste(pl1);
+        Controller.addDayToPrisliste(DayOfWeek.FRIDAY, pl2);
+        Controller.addAllDaysToPrisliste(pl3);
+        Controller.addAllDaysToPrisliste(pl4);
+        Controller.addAllDaysToPrisliste(pl5);
+
+        Produktkategori pk1 = Controller.createProduktkategori("Flaske øl", "Indeholder alle varianter af flaske øl", Maalbar.cL);
+        Produktkategori pk2 = Controller.createProduktkategori("Fadøl", "Indeholder alle varianter af fadøl", Maalbar.cL);
+        Controller.createProduktkategori("Klippekort", "Diverse klippekort", Maalbar.Stk);
+        Controller.createProduktkategori("Rundvisninger", "Diverse Rundvisninger", Maalbar.Stk);
 
         Produkt p1 = Controller.createProdukt("Klosterbryg", 50,150, pk1);
         Produkt p2 = Controller.createProdukt("Extra Pilsner", 50, 100,pk1);
