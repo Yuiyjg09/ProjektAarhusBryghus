@@ -16,12 +16,14 @@ import java.util.HashMap;
 
 class OpretProduktWindow extends Stage {
     private Produktkategori produktkategori;
+
     private Produkt produktet;
     private Prisliste prislisteSelected, prislisteToRemove;
     private HashMap<Prisliste, Double> priser = new HashMap<>();
     private TextField txfNavn, txfStoerrelse, txfLagerAntal, txfPris;
     private ListView<Prisliste> lvwPrislisteSelected, lvwPrislisteToRemove;
     private ComboBox<Produktkategori> cbPk;
+
 
     OpretProduktWindow(String title, Produktkategori produktkategori, Produkt produkt) {
         this.produktkategori = produktkategori;
@@ -96,6 +98,7 @@ class OpretProduktWindow extends Stage {
         ChangeListener<Prisliste> prislisteChangeListener = (oitem, olditem, newitem) -> this.selectChangeListenerPrislisteSelected();
         lvwPrislisteSelected.getSelectionModel().selectedItemProperty().addListener(prislisteChangeListener);
 
+
         lvwPrislisteToRemove = new ListView<>();
         pane.add(lvwPrislisteToRemove,2,5,1,4);
         lvwPrislisteToRemove.getItems().addAll();
@@ -121,6 +124,7 @@ class OpretProduktWindow extends Stage {
 
         initControls();
     }
+
 
     private void selectChangeListenerProduktKategori() { produktkategori = cbPk.getSelectionModel().getSelectedItem(); }
 
@@ -221,6 +225,7 @@ class OpretProduktWindow extends Stage {
             txfLagerAntal.setText("" + produktet.getLagerAntal());
             cbPk.setValue(produktet.getKategori());
             lvwPrislisteToRemove.getItems().addAll(Controller.getProduktPrislister(produktet));
+
         }
     }
 

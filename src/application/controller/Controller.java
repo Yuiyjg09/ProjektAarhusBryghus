@@ -47,6 +47,7 @@ public class Controller {
      * Metoden fjerner et produktkategori objekt fra storage, hvis den ikke indeholder nogen tilknyttede produkter
      * @param produktkategori Produktkategori
      */
+
     public static void deleteProduktkategori(Produktkategori produktkategori) throws Exception {
         if (produktkategori.getProdukter().isEmpty()) {
             Storage.removeProduktkategori(produktkategori);

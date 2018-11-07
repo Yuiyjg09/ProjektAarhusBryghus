@@ -167,6 +167,7 @@ class ProduktkategoriPane extends GridPane {
 
 
         updateSelectedControls();
+
     }
 
     private void updateProduktAction() {
@@ -176,6 +177,7 @@ class ProduktkategoriPane extends GridPane {
         if(pk != null && p != null) {
             OpretProduktWindow win = new OpretProduktWindow("Rediger produkt",pk, p);
             win.showAndWait();
+
             updateSelectedControls();
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
