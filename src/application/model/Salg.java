@@ -4,14 +4,16 @@ import java.util.ArrayList;
 
 public class Salg {
     private static int nummer = 0;
-    private LocalDateTime salgsdato;
-    private boolean isBetalt;
-    private double totalPris;
-    private Sellable betalingsmetode;
-    private ArrayList<Antal> antalProdukter;
+    private int salgsNummer;
+    LocalDateTime salgsdato;
+    boolean isBetalt;
+    double totalPris;
+    Sellable betalingsmetode;
+    ArrayList<Antal> antalProdukter;
 
     public Salg() {
         nummer++;
+        this.salgsNummer = nummer;
         this.salgsdato = LocalDateTime.now();
         this.isBetalt = false;
         this.betalingsmetode = null;
@@ -20,7 +22,7 @@ public class Salg {
     }
 
     public ArrayList<Antal> getAntalProdukter() {
-        return new ArrayList<Antal>(antalProdukter);
+        return new ArrayList<>(antalProdukter);
     }
 
     public Antal createAntal(Produkt produkt, int antal) {
@@ -39,7 +41,7 @@ public class Salg {
         this.antalProdukter = antalProdukter;
     }
 
-    public void addAntal(Antal antal) {
+    private void addAntal(Antal antal) {
         antalProdukter.add(antal);
     }
 
@@ -47,8 +49,8 @@ public class Salg {
         antalProdukter.remove(antal);
     }
 
-    public static int getNummer() {
-        return nummer;
+    public int getNummer() {
+        return salgsNummer;
     }
 
     public LocalDateTime getSalgsdato() {
@@ -60,6 +62,11 @@ public class Salg {
     }
 
     public double getTotalPris() {
+        beregnTotalPris();
+        return totalPris;
+    }
+
+    public double getTotalPrisEdited() {
         return totalPris;
     }
 
@@ -76,13 +83,8 @@ public class Salg {
     }
 
     public void betal(boolean isBetalt, Sellable betalingsmetode) {
-        if (isBetalt) {
-            this.setBetalt(true);
-            this.setBetalingsmetode(betalingsmetode);
-        } else {
-            this.setBetalt(false);
-            this.setBetalingsmetode(null);
-        }
+       setBetalt(isBetalt);
+       setBetalingsmetode(betalingsmetode);
     }
 
     public void beregnTotalPris() {
@@ -94,13 +96,18 @@ public class Salg {
         this.totalPris = prisTotal;
     }
 
+    public void setTotalPris(double totalPris) {
+        this.totalPris = totalPris;
+    }
+
     @Override
     public String toString() {
         return "Salg{" +
-                "salgsdato=" + salgsdato +
+                "nummer=" + salgsNummer +
+                ", salgsdato=" + salgsdato +
                 ", isBetalt=" + isBetalt +
-                ", totalPris=" + totalPris +
-                ", betalingsmetode=" + betalingsmetode +
+                ", totalPris=" + this.getTotalPris() +
+                "DKK, betalingsmetode=" + betalingsmetode +
                 ", antalProdukter=" + antalProdukter +
                 '}';
     }

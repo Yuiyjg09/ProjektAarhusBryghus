@@ -1,10 +1,7 @@
 package gui;
 
 import application.controller.Controller;
-import application.model.Pris;
-import application.model.Prisliste;
-import application.model.Produkt;
-import application.model.Produktkategori;
+import application.model.*;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -67,14 +64,11 @@ class OpretProduktWindow extends Stage {
         Label lblPrislister = new Label("Mulige prislister:");
         pane.add(lblPrislister, 0,4);
 
-        Label lblPrislisterAdded = new Label("Mulige prislister:");
+        Label lblPrislisterAdded = new Label("Tilføjede prislister:");
         pane.add(lblPrislisterAdded, 2,4);
 
         Label lblPris = new Label("Angiv pris (DKK):");
         pane.add(lblPris,1,4);
-
-        Label lblError = new Label("");
-        pane.add(lblError, 0,8,1,3);
 
         txfNavn = new TextField();
         pane.add(txfNavn,0,1);
@@ -109,20 +103,20 @@ class OpretProduktWindow extends Stage {
         ChangeListener<Prisliste> prislisteAddedChangeListener = (oitem1, olditem1, newitem1) -> this.selectChangeListenerPrislisteToRemove();
         lvwPrislisteToRemove.getSelectionModel().selectedItemProperty().addListener(prislisteAddedChangeListener);
 
-        Button btnAdd = new Button("Tilføj");
+        Button btnAdd = new Button("Tilføj Prisliste");
         pane.add(btnAdd,1,6);
         btnAdd.setOnAction(event -> this.addAction());
 
-        Button btnRemove = new Button("Fjern");
+        Button btnRemove = new Button("Fjern Prisliste");
         pane.add(btnRemove,1,7);
         btnRemove.setOnAction(event -> this.removeAction());
 
-        Button btnOk = new Button("Ok");
-        pane.add(btnOk, 0,9);
+        Button btnOk = new Button("Opret Produkt");
+        pane.add(btnOk, 0,13);
         btnOk.setOnAction(event -> this.okAction());
 
         Button btnCancel = new Button("Afbryd");
-        pane.add(btnCancel, 2,9);
+        pane.add(btnCancel, 2,13);
         btnCancel.setOnAction(event -> this.cancelAction());
 
         initControls();
@@ -139,31 +133,31 @@ class OpretProduktWindow extends Stage {
             && !txfStoerrelse.getText().isEmpty()
             && !txfLagerAntal.getText().isEmpty()
             && produktkategori != null) {
-            try {
-                int lagerantal = Integer.parseInt(txfLagerAntal.getText());
-                double stoerrelse = Double.parseDouble(txfStoerrelse.getText());
-                if (produktet != null) {
-                    Controller.updateProdukt(txfNavn.getText(), stoerrelse, lagerantal, produktkategori, produktet);
-                } else {
-                    produktet = Controller.createProdukt(txfNavn.getText(), stoerrelse, lagerantal, produktkategori);
-                }
-                for (Pris pris :
-                        produktet.getPriser()) {
-                    Controller.deletePris(pris);
-                }
-                for (Prisliste key :
-                        priser.keySet()) {
-                    Controller.createPris(priser.get(key), produktet, key);
-                }
+                try {
+                    int lagerantal = Integer.parseInt(txfLagerAntal.getText());
+                    double stoerrelse = Double.parseDouble(txfStoerrelse.getText());
+                    if (produktet != null) {
+                        Controller.updateProdukt(txfNavn.getText(), stoerrelse, lagerantal, produktkategori, produktet);
+                    } else {
+                        produktet = Controller.createProdukt(txfNavn.getText(), stoerrelse, lagerantal, produktkategori);
+                    }
+                    for (Pris pris :
+                            produktet.getPriser()) {
+                        Controller.deletePris(pris);
+                    }
+                    for (Prisliste key :
+                            priser.keySet()) {
+                        Controller.createPris(priser.get(key), produktet, key);
+                    }
 
-                this.close();
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setContentText("Indtast en gyldig pris");
-                alert.setTitle("Ugyldig Pris");
-                alert.showAndWait();
-            }
+                    this.close();
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setContentText("Indtast en gyldig pris");
+                    alert.setTitle("Ugyldig Pris");
+                    alert.showAndWait();
+                }
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setContentText("Indtast manglende information");
@@ -175,23 +169,35 @@ class OpretProduktWindow extends Stage {
     private void cancelAction() {this.close();}
 
     private void addAction() {
-        if (prislisteSelected != null
-            && !lvwPrislisteToRemove.getItems().contains(prislisteSelected)
-            && !txfPris.getText().isEmpty()) {
-            lvwPrislisteToRemove.getItems().add(prislisteSelected);
-            try {
-                priser.put(prislisteSelected, Double.parseDouble(txfPris.getText()));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
+        if (!lvwPrislisteToRemove.getItems().contains(prislisteSelected)) {
+            if (!txfPris.getText().isEmpty()) {
+                if (prislisteSelected != null) {
+                    lvwPrislisteToRemove.getItems().add(prislisteSelected);
+                    try {
+                        priser.put(prislisteSelected, Double.parseDouble(txfPris.getText()));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setContentText("Indtast en gyldig pris");
+                        alert.setTitle("Manglende Pris");
+                        alert.showAndWait();
+                    }
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setContentText("Ingen prisliste valgt - Vælg venligst en prisliste");
+                    alert.setTitle("Fejl - Ingen prisliste valgt");
+                    alert.showAndWait();
+                }
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setContentText("Indtast en gyldig pris");
-                alert.setTitle("Manglende Pris");
+                alert.setContentText("Ingen pris - Indtast venligst en gyldig pris");
+                alert.setTitle("Fejl - Ingen pris");
                 alert.showAndWait();
             }
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("Ingen prisliste valgt/Ingen pris/Produktet er allerede tilføjet");
-            alert.setTitle("Fejl");
+            alert.setContentText("Prislisten er allerede tilføjet - Hvis du vil ændre prisen, så skal prislisten fjernes først og derefter tilføjes igen");
+            alert.setTitle("Fejl - Prislisten er allerede tilføjet");
             alert.showAndWait();
         }
     }

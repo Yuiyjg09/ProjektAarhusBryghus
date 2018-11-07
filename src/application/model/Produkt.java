@@ -56,8 +56,28 @@ public class Produkt {
         this.priser = priser;
     }
 
+    public void sorterPriser() {
+        ArrayList<Pris> prises = new ArrayList<>();
+        for (Pris pris:
+             this.getPriser()) {
+            if (pris.getPrisliste().getNavn().toLowerCase().equals("butik")) {
+                prises.add(pris);
+            }
+        }
+
+        for (Pris pris:
+             this.getPriser()) {
+            if (!pris.getPrisliste().getNavn().toLowerCase().equals("butik")) {
+                prises.add(pris);
+            }
+        }
+
+        this.setPriser(prises);
+    }
+
     public void addPris (Pris pris) {
         this.priser.add(pris);
+        this.sorterPriser();
     }
 
     public void removePris (Pris pris) {

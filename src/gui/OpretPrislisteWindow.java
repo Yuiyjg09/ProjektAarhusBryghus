@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.time.DayOfWeek;
@@ -100,10 +101,12 @@ class OpretPrislisteWindow extends Stage {
         lvwProdukter.getSelectionModel().selectedItemProperty().addListener(produktChangeListener);
 
         //Pris
+        VBox prisVBox = new VBox();
+        gridPane.add(prisVBox, 1, 8);
         Label lblPris = new Label("Pris: ");
-        gridPane.add(lblPris, 1, 8);
+        prisVBox.getChildren().add(lblPris);
         txfPris = new TextField();
-        gridPane.add(txfPris, 1, 9);
+        prisVBox.getChildren().add(txfPris);
 
         //Produkter tilføjet
         Label lblProdukterTilfoejet = new Label("Produkter Tilføjet");
@@ -144,11 +147,11 @@ class OpretPrislisteWindow extends Stage {
 
         //Buttons
         Button btnAdd = new Button("Tilføj");
-        gridPane.add(btnAdd, 1, 10);
+        prisVBox.getChildren().add(btnAdd);
         btnAdd.setOnAction(event -> this.addAction());
 
         Button btnRemove = new Button("Fjern");
-        gridPane.add(btnRemove, 1, 11);
+        prisVBox.getChildren().add(btnRemove);
         btnRemove.setOnAction(event -> this.removeAction());
 
         Button btnOK = new Button("Opret Prisliste");
@@ -170,14 +173,21 @@ class OpretPrislisteWindow extends Stage {
 
     private void addAction() {
         if (produktSelected != null
-                && !lvwTilfoejet.getItems().contains(produktSelected)
-                && !txfPris.getText().isEmpty()) {
-            lvwTilfoejet.getItems().add(produktSelected);
-            try {
-                priser.put(produktSelected, Double.parseDouble(txfPris.getText()));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
+                && !lvwTilfoejet.getItems().contains(produktSelected)) {
+            if (!txfPris.getText().isEmpty()) {
+                lvwTilfoejet.getItems().add(produktSelected);
+                try {
+                    priser.put(produktSelected, Double.parseDouble(txfPris.getText()));
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Fejl - Forkert pris-format");
+                    alert.setContentText("Forkert pris-format - Indtast venligst en gyldig pris");
+                    alert.showAndWait();
+                }
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Manglende pris - Indtast venligst en gyldig pris");
+                alert.setTitle("Fejl - Manglende pris");
                 alert.showAndWait();
             }
         } else {

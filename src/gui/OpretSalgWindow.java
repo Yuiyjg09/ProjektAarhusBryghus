@@ -4,13 +4,17 @@ import application.controller.Controller;
 import application.model.Antal;
 import application.model.Produkt;
 import application.model.Salg;
+import application.model.Udlejning;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class OpretSalgWindow extends Stage {
+import java.util.Optional;
+
+class OpretSalgWindow extends Stage {
     private ListView<Produkt> lvwAllProdukter;
     private ListView<Antal> lvwProdukterToRemove;
     private TextField txfAntal, txfPant;
@@ -21,7 +25,7 @@ public class OpretSalgWindow extends Stage {
     private Salg salget;
     private Label priceTag;
 
-    public OpretSalgWindow() {
+    OpretSalgWindow() {
         this.salget = Controller.createSalg();
         this.setTitle("Opret Salg");
         GridPane pane = new GridPane();
@@ -39,24 +43,27 @@ public class OpretSalgWindow extends Stage {
         lvwAllProdukter = new ListView<>();
         pane.add(lvwAllProdukter, 0, 1);
         lvwAllProdukter.getItems().setAll(Controller.getProdukter());
+        lvwAllProdukter.getItems().addAll(Controller.getGaveAesker());
 
         ChangeListener<Produkt> allProduktChangeListener = (oitem, olditem, newitem) -> this.selectedAllProdukterChanged();
         lvwAllProdukter.getSelectionModel().selectedItemProperty().addListener(allProduktChangeListener);
 
+        VBox antalVBox = new VBox();
+        pane.add(antalVBox,1,1);
         //Antal
         Label lblAntal = new Label("Antal");
-        pane.add(lblAntal, 1, 0);
+        antalVBox.getChildren().add(lblAntal);
 
         txfAntal = new TextField("1");
-        pane.add(txfAntal, 1, 1);
+        antalVBox.getChildren().add(txfAntal);
 
         //Tilføj og Fjern knapper
         Button btnAdd = new Button("Læg i Kurv");
-        pane.add(btnAdd, 1, 2);
+        antalVBox.getChildren().add(btnAdd);
         btnAdd.setOnAction(event -> this.addAction());
 
         Button btnRemove = new Button("Fjern fra Kurv");
-        pane.add(btnRemove, 1, 3);
+        antalVBox.getChildren().add(btnRemove);
         btnRemove.setOnAction(event -> this.removeAction());
 
         //Produkter i salget
@@ -86,17 +93,20 @@ public class OpretSalgWindow extends Stage {
 
         txfPant = new TextField();
         pane.add(txfPant, 0, 6);
+        txfPant.setDisable(true);
 
         //DatePickers
         Label lblStart = new Label("Start Dato");
         pane.add(lblStart, 1, 5);
         dpStart = new DatePicker();
         pane.add(dpStart, 1, 6);
+        dpStart.setDisable(true);
 
         Label lblRetur = new Label("Retur Dato");
         pane.add(lblRetur,2,5);
         dpRetur = new DatePicker();
         pane.add(dpRetur, 2, 6);
+        dpRetur.setDisable(true);
 
         //PriceTag - Totalpris for salget
         priceTag = new Label("Pris: 0.0 DKK");
@@ -110,6 +120,8 @@ public class OpretSalgWindow extends Stage {
         Button btnCancel = new Button("Afbryd");
         pane.add(btnCancel, 1, 8);
         btnCancel.setOnAction(event -> this.cancelAction());
+
+        this.setOnCloseRequest(event -> this.cancelAction());
     }
 
     private void selectedAllProdukterChanged() {produktToAdd = lvwAllProdukter.getSelectionModel().getSelectedItem();}
@@ -137,16 +149,73 @@ public class OpretSalgWindow extends Stage {
     }
 
     private void createAction() {
+        Alert confirm = new Alert(Alert.AlertType.INFORMATION);
+        confirm.setTitle("Fortsæt");
+        confirm.setContentText("Er du sikker på at du vil fortsætte?");
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            boolean canBeSold = true;
+            for (Antal antal:
+                 salget.getAntalProdukter()) {
+                if (antal.beregnPris() <= 0) {
+                    canBeSold = false;
+                }
+            }
+            if (salget.getTotalPris() > 0 && canBeSold) {
+                if (isUdlejningCheckBox.isSelected()) {
+                    try {
+                        Udlejning udlejning = Controller.createUdlejning(Double.parseDouble(txfPant.getText()), dpStart.getValue(), dpRetur.getValue());
+                        for (Antal antal :
+                                lvwProdukterToRemove.getItems()) {
+                            udlejning.createAntal(antal.getProdukt(), antal.getAntal());
+                            salget.deleteAntal(antal);
+                        }
+                        Controller.deleteSalg(salget);
+                        BetalSalgWindow betalSalgWindow = new BetalSalgWindow(udlejning, this);
+                        betalSalgWindow.showAndWait();
 
+                        this.close();
+                    } catch (NumberFormatException e) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setContentText("Ugyldig antal - Kun tal er tilladt");
+                        alert.setTitle("Fejl - Ugyldig antal");
+                        alert.showAndWait();
+                    }
+                } else {
+                    Alert pay = new Alert(Alert.AlertType.CONFIRMATION, "Vil du fortsætte til betaling?", ButtonType.YES, ButtonType.NO);
+                    pay.setTitle("Fuldfør Salg");
+                    Optional<ButtonType> payResult = pay.showAndWait();
+                    if (payResult.isPresent() && payResult.get() == ButtonType.YES) {
+                        BetalSalgWindow betalSalgWindow = new BetalSalgWindow(salget, this);
+                        betalSalgWindow.showAndWait();
+                    } else {
+                        this.close();
+                    }
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Du har produkter, der ikke kan sælges nu");
+                alert.setContentText("Du har produkter, der ikke kan sælges nu - Deres pris er 0 DKK, fordi produktet ikke kan sælges uden for prislistens gyldige tidspunkter");
+                alert.showAndWait();
+            }
+        }
     }
 
     private void addAction() {
         if (produktToAdd != null) {
             try {
-                Antal antal = Controller.createAntal(produktToAdd, salget, Integer.parseInt(txfAntal.getText()));
-                lvwProdukterToRemove.getItems().add(antal);
+                if (Integer.parseInt(txfAntal.getText()) <= produktToAdd.getLagerAntal()) {
+                    Antal antal = Controller.createAntal(produktToAdd, salget, Integer.parseInt(txfAntal.getText()));
+                    lvwProdukterToRemove.getItems().add(antal);
+                    antal.getProdukt().setLagerAntal(antal.getProdukt().getLagerAntal() - antal.getAntal());
 
-                updateControls();
+                    updateControls();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Fejl - Produktet er ikke på lager");
+                    alert.setContentText("Produktet er ikke på lager - Antal på lager: " + produktToAdd.getLagerAntal() + " stk");
+                    alert.showAndWait();
+                }
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -165,6 +234,7 @@ public class OpretSalgWindow extends Stage {
     private void removeAction() {
         if (produktToRemove != null) {
             Controller.deleteAntal(produktToRemove);
+            produktToRemove.getProdukt().setLagerAntal(produktToRemove.getProdukt().getLagerAntal() + produktToRemove.getAntal());
             lvwProdukterToRemove.getItems().remove(produktToRemove);
 
             updateControls();

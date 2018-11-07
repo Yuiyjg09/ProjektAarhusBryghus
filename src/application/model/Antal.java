@@ -44,20 +44,12 @@ public class Antal {
 
         for (Pris pris:
              getProdukt().getPriser()) {
-            if(pris.getPrisliste().getDatoStart() == null
-                && pris.getPrisliste().getDatoSlut() == null) {
-                prisen = pris.getPris();
-            }
-        }
-
-        for (Pris pris:
-             getProdukt().getPriser()) {
             if (pris.getPrisliste().getDatoSlut().isBefore(dateTime)
                 && pris.getPrisliste().getDatoSlut().isAfter(this.getSalg().getSalgsdato())
                 && pris.getPrisliste().getDatoStart().isBefore(this.getSalg().getSalgsdato())
                 && pris.getPrisliste().getGyldigeDage().contains(LocalDateTime.now().getDayOfWeek())
-                //  && pris.getPrisliste().getDatoSlut().toLocalTime().isBefore(this.getSalg().getSalgsdato().toLocalTime())
-            //    && pris.getPrisliste().getDatoStart().toLocalTime().isAfter(this.getSalg().getSalgsdato().toLocalTime())
+                  && pris.getPrisliste().getDatoSlut().toLocalTime().isAfter(this.getSalg().getSalgsdato().toLocalTime())
+                && pris.getPrisliste().getDatoStart().toLocalTime().isBefore(this.getSalg().getSalgsdato().toLocalTime())
             ) {
                 dateTime = pris.getPrisliste().getDatoSlut();
                 prisen = pris.getPris();
@@ -68,6 +60,6 @@ public class Antal {
 
     @Override
     public String toString() {
-        return produkt.toString() + ", antal: " + antal + ", pris: " + beregnPris() + " DKK";
+        return produkt.getNavn() + ", antal: " + antal + ", pris: " + beregnPris() + " DKK";
     }
 }
